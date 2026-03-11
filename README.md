@@ -1,6 +1,6 @@
-# Doc2Bot - Arabic Podcast Generator (Backend)
+# Doc2Bod - Arabic Podcast Generator (Backend)
 
-**Doc2Bot** is a scalable backend service that transforms PDF documents into high-quality **Egyptian Arabic podcasts** using AI.  
+**Doc2Bod** is a scalable backend service that transforms PDF documents into high-quality **Egyptian Arabic podcasts** using AI.  
 
 Upload any PDF → Extract content → Convert to natural Egyptian Arabic → Generate professional audio podcast.
 
@@ -22,7 +22,7 @@ Upload any PDF → Extract content → Convert to natural Egyptian Arabic → Ge
 ## 📁 Project Structure
 
 ```bash
-Doc2Bot-Backend/
+Doc2Bod-Backend/
 ├── src/
 │   ├── controllers/    # FastAPI/Express/ASP.NET controllers & API endpoints
 │   ├── services/       # PDF parser, text processor, TTS engine, Egyptian dialect adapter
