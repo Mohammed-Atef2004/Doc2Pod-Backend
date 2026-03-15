@@ -136,3 +136,4 @@ D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Infrastructure\obj\Debug\net9
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Infrastructure\obj\Debug\net9.0\Infrastructure.pdb
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Infrastructure\obj\Debug\net9.0\Infrastructure.genruntimeconfig.cache
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Infrastructure\obj\Debug\net9.0\ref\Infrastructure.dll
+D:\visual-studio-programs\Doc2Pod\Infrastructure\obj\Debug\net9.0\Infrastructure.sourcelink.json

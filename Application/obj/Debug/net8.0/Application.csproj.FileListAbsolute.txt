@@ -108,3 +108,4 @@ D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Application\obj\Debug\net8.0\
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Application\obj\Debug\net8.0\refint\Application.dll
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Application\obj\Debug\net8.0\Application.pdb
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Application\obj\Debug\net8.0\ref\Application.dll
+D:\visual-studio-programs\Doc2Pod\Application\obj\Debug\net8.0\Application.sourcelink.json

@@ -87,3 +87,4 @@ D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Domain\obj\Debug\net8.0\Domai
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Domain\obj\Debug\net8.0\refint\Domain.dll
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Domain\obj\Debug\net8.0\Domain.pdb
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Domain\obj\Debug\net8.0\ref\Domain.dll
+D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.sourcelink.json

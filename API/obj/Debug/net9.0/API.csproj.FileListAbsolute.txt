@@ -1617,3 +1617,4 @@ D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\API\obj\Debug\net9.0\refint\A
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\API\obj\Debug\net9.0\API.pdb
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\API\obj\Debug\net9.0\API.genruntimeconfig.cache
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\API\obj\Debug\net9.0\ref\API.dll
+D:\visual-studio-programs\Doc2Pod\API\obj\Debug\net9.0\API.sourcelink.json
