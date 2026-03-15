@@ -1,8 +1,7 @@
-﻿using System.Linq.Expressions;
-using Domain.Common;
-using Domain.Interfaces.Repositories;
+﻿using Domain.Interfaces.Repositories;
 using Infrastructure.Presistence.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories.Shared
 {
@@ -21,6 +20,9 @@ namespace Infrastructure.Repositories.Shared
 
         // Always NoTracking for better read performance
         public virtual IQueryable<T> EntityQuery => _dbSet.AsNoTracking();
+
+        public async Task<T?> GetByIdAsync(object id)
+            => await _dbSet.FindAsync(id);
 
         public async Task AddAsync(T entity) => await _dbSet.AddAsync(entity);
 

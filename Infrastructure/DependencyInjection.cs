@@ -1,7 +1,10 @@
 ﻿using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services;
 using Infrastructure.Presistence.Data;
 using Infrastructure.Presistence.Interceptors;
+using Infrastructure.Repositories;
 using Infrastructure.Repositories.Shared;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,7 +34,12 @@ namespace Infrastructure.Persistence
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             //  4. Register Repositories 
-            
+            services.AddScoped<IDocumentRepository, DocumentRepository>();
+            services.AddScoped<IPodcastRepository, PodcastRepository>();
+
+            //  5. Register Services
+            services.AddScoped<IFileStorageService, FileStorageService>();
+            services.AddHttpClient<IPythonRagService, PythonRagService>();
 
             return services;
         }
