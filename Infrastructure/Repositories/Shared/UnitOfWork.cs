@@ -1,6 +1,5 @@
 ﻿using Domain.Interfaces.Repositories;
 using Infrastructure.Presistence.Data;
-using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories.Shared
@@ -9,19 +8,22 @@ namespace Infrastructure.Repositories.Shared
     {
         private readonly AppDbContext _context;
 
+        public IDocumentRepository Document { get; private set; }
+        public IPodcastRepository Podcast { get; private set; }
 
         public UnitOfWork(AppDbContext context)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _context = context;
+            Document = new DocumentRepository(_context);
+            Podcast = new PodcastRepository(_context);
         }
-
 
 
         public async Task<int> CompleteAsync(CancellationToken cancellationToken = default)
         {
             return await _context.SaveChangesAsync(cancellationToken);
         }
-       
+
 
         public void Dispose()
         {
@@ -49,7 +51,7 @@ namespace Infrastructure.Repositories.Shared
                 }
             }
             await Task.CompletedTask; // Placeholder for any async operations if needed
-            return 0; 
+            return 0;
         }
     }
 }

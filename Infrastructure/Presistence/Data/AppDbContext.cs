@@ -1,4 +1,5 @@
 ﻿
+using Domain.Entities;
 using Domain.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -11,7 +12,9 @@ namespace Infrastructure.Presistence.Data
 {
     public class AppDbContext : DbContext
     {
-       
+
+        public DbSet<Document> Documents { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
