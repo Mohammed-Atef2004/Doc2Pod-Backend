@@ -58,6 +58,8 @@ public static class UserErrors
         public static readonly Error PasswordAlreadyUsed =
             new("User.Security.PasswordAlreadyUsed",
                 "This password was used recently. Please choose a different password.");
+        public static readonly Error InvalidEmailToken
+            = new("User.Security.InvalidEmailToken", "The provided email token is invalid or expired.");
     }
 
 }
