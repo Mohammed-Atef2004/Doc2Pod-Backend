@@ -20,8 +20,9 @@ namespace  Domain.Users.ValueObjects
             RegexOptions.Compiled,
             matchTimeout: TimeSpan.FromMilliseconds(100));
 
-        public string Value { get; }
+        public string Value { get; private set; }
 
+        private PhoneNumber(){}
         private PhoneNumber(string value) => Value = value;
 
         public static Result<PhoneNumber> Create(string? value)

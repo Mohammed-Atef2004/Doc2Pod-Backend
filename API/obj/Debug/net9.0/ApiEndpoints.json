@@ -1,5 +1,100 @@
 [
   {
+    "ContainingType": "EducationalPlatform.Presentation.Controllers.AdminController",
+    "Method": "DeleteUser",
+    "RelativePath": "api/admin/users/{userId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "EducationalPlatform.Presentation.Controllers.DeleteRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EducationalPlatform.Presentation.Controllers.AdminController",
+    "Method": "DeactivateUser",
+    "RelativePath": "api/admin/users/{userId}/deactivate",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "EducationalPlatform.Presentation.Controllers.DeactivateRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EducationalPlatform.Presentation.Controllers.AdminController",
+    "Method": "ReactivateUser",
+    "RelativePath": "api/admin/users/{userId}/reactivate",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EducationalPlatform.Presentation.Controllers.AdminController",
+    "Method": "ChangeRole",
+    "RelativePath": "api/admin/users/{userId}/role",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "EducationalPlatform.Presentation.Controllers.ChangeRoleRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EducationalPlatform.Presentation.Controllers.AdminController",
+    "Method": "UnlockAccount",
+    "RelativePath": "api/admin/users/{userId}/unlock",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "API.Controllers.DocumentController",
     "Method": "Upload",
     "RelativePath": "api/documents/upload",
@@ -26,6 +121,32 @@
       {
         "Name": "command",
         "Type": "Application.Features.Podcasts.Commands.GeneratePodcast.GeneratePodcastCommand",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EducationalPlatform.Presentation.Controllers.SecurityController",
+    "Method": "Disable2FA",
+    "RelativePath": "api/security/2fa/disable",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EducationalPlatform.Presentation.Controllers.SecurityController",
+    "Method": "Enable2FA",
+    "RelativePath": "api/security/2fa/enable",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "EducationalPlatform.Presentation.Controllers.Enable2FARequest",
         "IsRequired": true
       }
     ],

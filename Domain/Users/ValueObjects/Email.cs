@@ -12,8 +12,9 @@ public sealed class Email : ValueObject
         RegexOptions.Compiled | RegexOptions.IgnoreCase,
         matchTimeout: TimeSpan.FromMilliseconds(250));
 
-    public string Value { get; }
+    public string Value { get; private set; }
 
+    private Email() { }
     private Email(string value) => Value = value;
 
     public static Result<Email> Create(string? value)

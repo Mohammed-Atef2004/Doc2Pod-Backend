@@ -8,10 +8,13 @@
 
   <ItemGroup>
     <Compile Remove="Common\Abstractions\**" />
+    <Compile Remove="Common\Interfaces\**" />
     <Compile Remove="Common\Models\**" />
     <EmbeddedResource Remove="Common\Abstractions\**" />
+    <EmbeddedResource Remove="Common\Interfaces\**" />
     <EmbeddedResource Remove="Common\Models\**" />
     <None Remove="Common\Abstractions\**" />
+    <None Remove="Common\Interfaces\**" />
     <None Remove="Common\Models\**" />
   </ItemGroup>
 
@@ -20,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Interfaces\" />
+    <Folder Include="Features\Users\Queries\" />
   </ItemGroup>
 
   <ItemGroup>

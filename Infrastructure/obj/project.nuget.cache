@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "mO+KMJ2YalQ=",
+  "dgSpecHash": "xVH38Hat+3s=",
   "success": true,
   "projectFilePath": "D:\\visual-studio-programs\\Doc2Pod\\Infrastructure\\Infrastructure.csproj",
   "expectedPackageFiles": [
@@ -81,6 +81,7 @@
     "D:\\NuGet_Cache\\mono.cecil\\0.11.3\\mono.cecil.0.11.3.nupkg.sha512",
     "D:\\NuGet_Cache\\mono.texttemplating\\3.0.0\\mono.texttemplating.3.0.0.nupkg.sha512",
     "D:\\NuGet_Cache\\netarchtest.rules\\1.3.2\\netarchtest.rules.1.3.2.nupkg.sha512",
+    "D:\\NuGet_Cache\\otp.net\\1.4.1\\otp.net.1.4.1.nupkg.sha512",
     "D:\\NuGet_Cache\\rabbitmq.client\\7.0.0\\rabbitmq.client.7.0.0.nupkg.sha512",
     "D:\\NuGet_Cache\\system.buffers\\4.6.0\\system.buffers.4.6.0.nupkg.sha512",
     "D:\\NuGet_Cache\\system.clientmodel\\1.0.0\\system.clientmodel.1.0.0.nupkg.sha512",
