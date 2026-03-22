@@ -18,5 +18,10 @@ namespace  Domain.Users.Errors
 
         public static readonly Error InvalidFormat =
             new("User.Email.InvalidFormat", "Email address format is invalid.");
+        public static readonly Error SendFailed =
+            new("Email.SendFailed", "An error occurred while sending the email. Please try again later.");
+
+        public static readonly Error RemoteServiceError =
+            new("Email.RemoteServiceError", "The email service is currently unavailable.");
     }
 }

@@ -28,13 +28,11 @@ namespace Infrastructure.Presistence.Data
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder); 
+
             modelBuilder.Ignore<DomainEvent>();
 
-            // Apply all configurations automatically
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-  
-
-            base.OnModelCreating(modelBuilder);
         }
     }
 }

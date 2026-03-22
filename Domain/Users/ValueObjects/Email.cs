@@ -39,5 +39,9 @@ public sealed class Email : ValueObject
     }
 
     public override string ToString() => Value;
+    public static Email FromDatabase(string value)
+    {
+        return new Email(value);
+    }
 }
 

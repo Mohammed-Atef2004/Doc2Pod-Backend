@@ -19,10 +19,12 @@ public sealed class IdentityService : IIdentityService
         _roleManager = roleManager;
     }
 
+    // =====================
+    // User Management
+    // =====================
     public async Task<Result<string>> CreateUserAsync(string email, string password, CancellationToken ct = default)
     {
         var normalizedEmail = email.ToLowerInvariant();
-
         var user = new ApplicationUser
         {
             UserName = normalizedEmail,
@@ -31,32 +33,34 @@ public sealed class IdentityService : IIdentityService
 
         var result = await _userManager.CreateAsync(user, password);
 
-        return result.Succeeded
-            ? Result<string>.Success(user.Id)
-            : Result<string>.Failure(MapIdentityErrors(result.Errors));
+        if (!result.Succeeded)
+            return Result<string>.Failure(MapIdentityErrors(result.Errors));
+
+        var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+        return Result<string>.Success(user.Id);
     }
 
     public async Task<Result> DeleteUserAsync(string identityId, CancellationToken ct = default)
     {
         var user = await _userManager.FindByIdAsync(identityId);
-        if (user is null)
-            return Result.Failure(UserErrors.NotFound);
+        if (user is null) return Result.Failure(UserErrors.NotFound);
 
         var result = await _userManager.DeleteAsync(user);
-
         return result.Succeeded
             ? Result.Success()
             : Result.Failure(MapIdentityErrors(result.Errors));
     }
 
+    // =====================
+    // Role Management
+    // =====================
     public async Task<Result> AssignRoleAsync(string identityId, UserRole role, CancellationToken ct = default)
     {
         var user = await _userManager.FindByIdAsync(identityId);
-        if (user is null)
-            return Result.Failure(UserErrors.NotFound);
+        if (user is null) return Result.Failure(UserErrors.NotFound);
 
         var roleName = role.ToString();
-
         if (!await _roleManager.RoleExistsAsync(roleName))
         {
             var roleResult = await _roleManager.CreateAsync(new IdentityRole(roleName));
@@ -64,11 +68,9 @@ public sealed class IdentityService : IIdentityService
                 return Result.Failure(MapIdentityErrors(roleResult.Errors));
         }
 
-        if (await _userManager.IsInRoleAsync(user, roleName))
-            return Result.Success();
+        if (await _userManager.IsInRoleAsync(user, roleName)) return Result.Success();
 
         var result = await _userManager.AddToRoleAsync(user, roleName);
-
         return result.Succeeded
             ? Result.Success()
             : Result.Failure(MapIdentityErrors(result.Errors));
@@ -77,48 +79,32 @@ public sealed class IdentityService : IIdentityService
     public async Task<Result> RemoveRoleAsync(string identityId, UserRole role, CancellationToken ct = default)
     {
         var user = await _userManager.FindByIdAsync(identityId);
-        if (user is null)
-            return Result.Failure(UserErrors.NotFound);
+        if (user is null) return Result.Failure(UserErrors.NotFound);
 
         var roleName = role.ToString();
-
-        if (!await _userManager.IsInRoleAsync(user, roleName))
-            return Result.Success();
+        if (!await _userManager.IsInRoleAsync(user, roleName)) return Result.Success();
 
         var result = await _userManager.RemoveFromRoleAsync(user, roleName);
-
         return result.Succeeded
             ? Result.Success()
             : Result.Failure(MapIdentityErrors(result.Errors));
     }
 
-    public async Task<bool> CheckPasswordAsync(string identityId, string password, CancellationToken ct = default)
+    // =====================
+    // Password Management
+    // =====================
+    public async Task<bool> CheckPasswordAsync(string email, string password, CancellationToken ct = default)
     {
-        var user = await _userManager.FindByIdAsync(identityId);
-        return user is not null && await _userManager.CheckPasswordAsync(user, password);
+        var user = await _userManager.FindByEmailAsync(email);
+        return user != null && await _userManager.CheckPasswordAsync(user, password);
     }
 
     public async Task<Result> ChangePasswordAsync(string identityId, string currentPassword, string newPassword, CancellationToken ct = default)
     {
         var user = await _userManager.FindByIdAsync(identityId);
-        if (user is null)
-            return Result.Failure(UserErrors.NotFound);
+        if (user is null) return Result.Failure(UserErrors.NotFound);
 
         var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
-
-        return result.Succeeded
-            ? Result.Success()
-            : Result.Failure(MapIdentityErrors(result.Errors));
-    }
-
-    public async Task<Result> ResetPasswordAsync(string identityId, string token, string newPassword, CancellationToken ct = default)
-    {
-        var user = await _userManager.FindByIdAsync(identityId);
-        if (user is null)
-            return Result.Failure(UserErrors.NotFound);
-
-        var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
-
         return result.Succeeded
             ? Result.Success()
             : Result.Failure(MapIdentityErrors(result.Errors));
@@ -132,10 +118,24 @@ public sealed class IdentityService : IIdentityService
         return await _userManager.GeneratePasswordResetTokenAsync(user);
     }
 
+    public async Task<Result> ResetPasswordAsync(string identityId, string token, string newPassword, CancellationToken ct = default)
+    {
+        var user = await _userManager.FindByIdAsync(identityId);
+        if (user is null) return Result.Failure(UserErrors.NotFound);
+
+        var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+        return result.Succeeded
+            ? Result.Success()
+            : Result.Failure(MapIdentityErrors(result.Errors));
+    }
+
+    // =====================
+    // Email Confirmation
+    // =====================
     public async Task<bool> IsEmailConfirmedAsync(string identityId, CancellationToken ct = default)
     {
         var user = await _userManager.FindByIdAsync(identityId);
-        return user is not null && await _userManager.IsEmailConfirmedAsync(user);
+        return user != null && await _userManager.IsEmailConfirmedAsync(user);
     }
 
     public async Task<string> GenerateEmailConfirmationTokenAsync(string identityId, CancellationToken ct = default)
@@ -149,16 +149,17 @@ public sealed class IdentityService : IIdentityService
     public async Task<Result> ConfirmEmailAsync(string identityId, string token, CancellationToken ct = default)
     {
         var user = await _userManager.FindByIdAsync(identityId);
-        if (user is null)
-            return Result.Failure(UserErrors.NotFound);
+        if (user is null) return Result.Failure(UserErrors.NotFound);
 
         var result = await _userManager.ConfirmEmailAsync(user, token);
-
         return result.Succeeded
             ? Result.Success()
             : Result.Failure(UserErrors.SecurityErrors.InvalidEmailToken);
     }
 
+    // =====================
+    // Email Change
+    // =====================
     public async Task<string> GenerateChangeEmailTokenAsync(string identityId, string newEmail, CancellationToken ct = default)
     {
         var user = await _userManager.FindByIdAsync(identityId)
@@ -170,26 +171,21 @@ public sealed class IdentityService : IIdentityService
     public async Task<Result> ConfirmEmailChangeAsync(string identityId, string newEmail, string token, CancellationToken ct = default)
     {
         var user = await _userManager.FindByIdAsync(identityId);
-        if (user is null)
-            return Result.Failure(UserErrors.NotFound);
+        if (user is null) return Result.Failure(UserErrors.NotFound);
 
         var result = await _userManager.ChangeEmailAsync(user, newEmail, token);
+        if (!result.Succeeded) return Result.Failure(UserErrors.SecurityErrors.InvalidEmailToken);
 
-        if (!result.Succeeded)
-            return Result.Failure(UserErrors.SecurityErrors.InvalidEmailToken);
-
-        user.UserName = newEmail.ToLowerInvariant();
         await _userManager.UpdateAsync(user);
-
         return Result.Success();
     }
 
+    // =====================
+    // Private Helpers
+    // =====================
     private static Error MapIdentityErrors(IEnumerable<IdentityError> errors)
     {
         var combined = string.Join(" | ", errors.Select(e => e.Description));
-
-        return new Error(
-            "Identity.Error",
-            string.IsNullOrWhiteSpace(combined) ? "An identity error occurred." : combined);
+        return new Error("Identity.Error", string.IsNullOrWhiteSpace(combined) ? "An identity error occurred." : combined);
     }
 }

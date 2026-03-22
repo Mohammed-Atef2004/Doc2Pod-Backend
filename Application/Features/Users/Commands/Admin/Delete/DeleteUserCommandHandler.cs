@@ -36,7 +36,7 @@ namespace Application.Features.Users.Commands.Admin.Delete
             if (result.IsFailure) return result;
 
             //await _tokens.RevokeAllRefreshTokensAsync(user.Id, ct);
-            _users.SoftDelete(user);
+            _users.Delete(user);
             await _uow.CompleteAsync(ct);
 
             await _audit.LogAsync(new AuditEntry(

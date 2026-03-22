@@ -52,5 +52,6 @@ namespace  Domain.Users.ValueObjects
         }
 
         public override string ToString() => Value;
+        public static Username FromDatabase(string value) => new Username(value);
     }
 }

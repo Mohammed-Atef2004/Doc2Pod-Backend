@@ -19,6 +19,7 @@ namespace Application.Features.Users
         public const string UserResetPassword = "User.ResetPassword";
         public const string UserChangePassword = "User.ChangePassword";
         public const string UserChangeEmail = "User.ChangeEmail";
+        public const string UserEmailChangeFailed = "User.EmailChangeFailed";
         public const string UserChangeName = "User.ChangeName";
         public const string UserSetPhoneNumber = "User.SetPhoneNumber";
         public const string UserRemovePhoneNumber = "User.RemovePhoneNumber";

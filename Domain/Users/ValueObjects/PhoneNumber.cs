@@ -48,5 +48,6 @@ namespace  Domain.Users.ValueObjects
         }
 
         public override string ToString() => Value;
+        public static PhoneNumber FromDatabase(string value) => new PhoneNumber(value);
     }
 }

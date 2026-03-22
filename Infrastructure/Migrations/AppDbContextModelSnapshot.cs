@@ -152,6 +152,9 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsEmailConfirmed")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsTwoFactorEnabled")
                         .HasColumnType("bit");
 
@@ -170,6 +173,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<DateTime>("RegisteredAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("RequiresTwoFactorReset")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
@@ -193,7 +199,7 @@ namespace Infrastructure.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("DomainUsers", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUser", b =>
@@ -480,7 +486,7 @@ namespace Infrastructure.Migrations
 
                             b1.HasKey("UserId");
 
-                            b1.ToTable("Users");
+                            b1.ToTable("DomainUsers");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");

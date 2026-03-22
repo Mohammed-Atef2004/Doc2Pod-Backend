@@ -2,12 +2,13 @@
 using Domain.Users.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.ToTable("Users");
+        builder.ToTable("DomainUsers"); // ✅ تغيير الاسم لتجنب التعارض مع Identity
 
         builder.HasKey(u => u.Id);
 
@@ -17,7 +18,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Email)
             .HasConversion(
                 email => email.Value,
-                value => Email.Create(value).Value
+                value => Email.FromDatabase(value)
             )
             .HasColumnName("Email")
             .IsRequired();
@@ -28,7 +29,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Username)
             .HasConversion(
                 username => username.Value,
-                value => Username.Create(value).Value
+                value => Username.FromDatabase(value)
             )
             .HasColumnName("Username")
             .IsRequired();
@@ -41,7 +42,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.PhoneNumber)
             .HasConversion(
                 phone => phone.Value,
-                value => PhoneNumber.Create(value).Value
+                value => PhoneNumber.FromDatabase(value)
             )
             .HasColumnName("PhoneNumber");
 

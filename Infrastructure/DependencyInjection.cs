@@ -1,13 +1,16 @@
 ﻿using Application.Features.Users.Services;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
+using Domain.Settings;
 using Domain.Users;
 using EducationalPlatform.Infrastructure.Services.Token;
+using Infrastructure.Identity;
 using Infrastructure.Presistence.Data;
 using Infrastructure.Presistence.Interceptors;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.Shared;
 using Infrastructure.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,21 +35,44 @@ public static class DependencyInjection
             options.AddInterceptors(interceptor);
         });
 
-        // 3. Register UnitOfWork
+        // 3. Register Identity with token providers
+        services.AddIdentityCore<ApplicationUser>()
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+
+        // 4. Register UnitOfWork
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // 4. Register Repositories
+        // 5. Register Settings
+        services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
+        services.Configure<ApiSettings>(configuration.GetSection(ApiSettings.SectionName));
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName)); // ✅ JWT options
+
+        // 6. Register Repositories
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IDocumentRepository, DocumentRepository>();
         services.AddScoped<IPodcastRepository, PodcastRepository>();
 
-        // 5. Register Services
+        // 7. Register Services
+        services.AddHttpContextAccessor();
+        services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ITotpService, TotpService>();
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IFileStorageService, FileStorageService>();
-        services.AddHttpClient<IPythonRagService, PythonRagService>();
+        services.AddTransient<IEmailService, EmailService>();
+        services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
-        return services; 
+        // 8. Register Python RAG Service
+        services.AddHttpClient<IPythonRagService, PythonRagService>(client =>
+        {
+            var baseUrl = configuration["PythonAI:BaseUrl"];
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = System.Threading.Timeout.InfiniteTimeSpan;
+            client.DefaultRequestHeaders.Add("ngrok-skip-browser-warning", "true");
+        });
+
+        return services;
     }
 }
