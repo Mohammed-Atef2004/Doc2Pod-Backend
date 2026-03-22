@@ -8,6 +8,7 @@
 	<PropertyGroup>
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 		<GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+		<UserSecretsId>a4183602-65f1-458b-b804-2f4bce922673</UserSecretsId>
 	</PropertyGroup>
 	<ItemGroup>
 	  <Compile Remove="Extensions\**" />

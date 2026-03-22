@@ -92,9 +92,15 @@ public sealed class IdentityService : IIdentityService
             : Result.Failure(MapIdentityErrors(result.Errors));
     }
 
-    public async Task<bool> CheckPasswordAsync(string identityId, string password, CancellationToken ct = default)
+    //public async Task<bool> CheckPasswordAsync(string identityId, string password, CancellationToken ct = default)
+    //{
+    //    var user = await _userManager.FindByIdAsync(identityId);
+    //    return user is not null && await _userManager.CheckPasswordAsync(user, password);
+    //}
+    
+    public async Task<bool> CheckPasswordAsync(string email, string password, CancellationToken ct = default)
     {
-        var user = await _userManager.FindByIdAsync(identityId);
+        var user = await _userManager.FindByEmailAsync(email);
         return user is not null && await _userManager.CheckPasswordAsync(user, password);
     }
 
@@ -178,7 +184,7 @@ public sealed class IdentityService : IIdentityService
         if (!result.Succeeded)
             return Result.Failure(UserErrors.SecurityErrors.InvalidEmailToken);
 
-        user.UserName = newEmail.ToLowerInvariant();
+        //user.UserName = newEmail.ToLowerInvariant();
         await _userManager.UpdateAsync(user);
 
         return Result.Success();

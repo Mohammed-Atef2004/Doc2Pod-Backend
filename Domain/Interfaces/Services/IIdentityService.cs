@@ -20,8 +20,7 @@ namespace Domain.Interfaces.Services
         Task<Result> RemoveRoleAsync(string identityId, UserRole role, CancellationToken ct = default);
 
 
-        Task<bool> CheckPasswordAsync(string identityId, string password, CancellationToken ct = default);
-        Task<Result> ChangePasswordAsync(string identityId, string currentPassword, string newPassword, CancellationToken ct = default);
+        Task<bool> CheckPasswordAsync(string email, string password, CancellationToken ct = default); Task<Result> ChangePasswordAsync(string identityId, string currentPassword, string newPassword, CancellationToken ct = default);
         Task<Result> ResetPasswordAsync(string identityId, string token, string newPassword, CancellationToken ct = default);
 
         Task<string> GeneratePasswordResetTokenAsync(string email, CancellationToken ct = default);

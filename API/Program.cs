@@ -21,19 +21,6 @@ namespace API
             builder.Services.AddLogging();
 
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            builder.Services.AddDbContext<AppDbContext>(options =>
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-            });
-
-        
-            builder.Services.AddHttpClient<IPythonRagService, PythonRagService>(client =>
-            {
-                var baseUrl = builder.Configuration["PythonAI:BaseUrl"];
-                client.BaseAddress = new Uri(baseUrl);
-                client.Timeout = System.Threading.Timeout.InfiniteTimeSpan;
-                client.DefaultRequestHeaders.Add("ngrok-skip-browser-warning", "true");
-            });
 
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();

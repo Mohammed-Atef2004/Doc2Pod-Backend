@@ -6,8 +6,10 @@ namespace  Domain.Users;
 
 public interface IUserRepository:IGenericRepository<User>
 {
+    Task<User?> GetByEmailAsync(Email email, CancellationToken ct = default);
+    Task<User?> GetByUsernameAsync(Username username, CancellationToken ct = default);
+    Task<User?> GetByIdentityIdAsync(string identityId, CancellationToken ct = default);
 
-   
     Task<bool> ExistsByEmailAsync(Email email, CancellationToken ct = default);
     Task<bool> ExistsByUsernameAsync(Username username, CancellationToken ct = default);
 

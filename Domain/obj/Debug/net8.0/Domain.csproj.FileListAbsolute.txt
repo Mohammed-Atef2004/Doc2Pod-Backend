@@ -88,3 +88,16 @@ D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Domain\obj\Debug\net8.0\refin
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Domain\obj\Debug\net8.0\Domain.pdb
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Domain\obj\Debug\net8.0\ref\Domain.dll
 D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.sourcelink.json
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Domain\bin\Debug\net8.0\Domain.deps.json
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Domain\bin\Debug\net8.0\Domain.dll
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Domain\bin\Debug\net8.0\Domain.pdb
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Domain\obj\Debug\net8.0\Domain.csproj.AssemblyReference.cache
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Domain\obj\Debug\net8.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Domain\obj\Debug\net8.0\Domain.AssemblyInfoInputs.cache
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Domain\obj\Debug\net8.0\Domain.AssemblyInfo.cs
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Domain\obj\Debug\net8.0\Domain.csproj.CoreCompileInputs.cache
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Domain\obj\Debug\net8.0\Domain.sourcelink.json
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Domain\obj\Debug\net8.0\Domain.dll
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Domain\obj\Debug\net8.0\refint\Domain.dll
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Domain\obj\Debug\net8.0\Domain.pdb
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Domain\obj\Debug\net8.0\ref\Domain.dll

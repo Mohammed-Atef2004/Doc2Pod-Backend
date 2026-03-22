@@ -109,3 +109,19 @@ D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Application\obj\Debug\net8.0\
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Application\obj\Debug\net8.0\Application.pdb
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Application\obj\Debug\net8.0\ref\Application.dll
 D:\visual-studio-programs\Doc2Pod\Application\obj\Debug\net8.0\Application.sourcelink.json
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\bin\Debug\net8.0\Application.deps.json
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\bin\Debug\net8.0\Application.dll
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\bin\Debug\net8.0\Application.pdb
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\bin\Debug\net8.0\Domain.dll
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\bin\Debug\net8.0\Domain.pdb
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\obj\Debug\net8.0\Application.csproj.AssemblyReference.cache
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\obj\Debug\net8.0\Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\obj\Debug\net8.0\Application.AssemblyInfoInputs.cache
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\obj\Debug\net8.0\Application.AssemblyInfo.cs
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\obj\Debug\net8.0\Application.csproj.CoreCompileInputs.cache
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\obj\Debug\net8.0\Application.sourcelink.json
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\obj\Debug\net8.0\Applicat.44B5EDA2.Up2Date
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\obj\Debug\net8.0\Application.dll
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\obj\Debug\net8.0\refint\Application.dll
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\obj\Debug\net8.0\Application.pdb
+D:\My importent folder\Graduation Project\GP_Back\Doc2Pod-Backend\Application\obj\Debug\net8.0\ref\Application.dll
