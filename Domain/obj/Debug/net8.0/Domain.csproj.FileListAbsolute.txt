@@ -49,18 +49,6 @@ D:\CleanArchitectureKit\Domain\obj\Debug\net8.0\Domain.dll
 D:\CleanArchitectureKit\Domain\obj\Debug\net8.0\refint\Domain.dll
 D:\CleanArchitectureKit\Domain\obj\Debug\net8.0\Domain.pdb
 D:\CleanArchitectureKit\Domain\obj\Debug\net8.0\ref\Domain.dll
-D:\visual-studio-programs\Doc2Pod\Domain\bin\Debug\net8.0\Domain.deps.json
-D:\visual-studio-programs\Doc2Pod\Domain\bin\Debug\net8.0\Domain.dll
-D:\visual-studio-programs\Doc2Pod\Domain\bin\Debug\net8.0\Domain.pdb
-D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.csproj.AssemblyReference.cache
-D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
-D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.AssemblyInfoInputs.cache
-D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.AssemblyInfo.cs
-D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.csproj.CoreCompileInputs.cache
-D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.dll
-D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\refint\Domain.dll
-D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.pdb
-D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\ref\Domain.dll
 C:\Users\Admin\Desktop\Doc2Pod\Doc2Pod-Backend\Domain\bin\Debug\net8.0\Domain.deps.json
 C:\Users\Admin\Desktop\Doc2Pod\Doc2Pod-Backend\Domain\bin\Debug\net8.0\Domain.dll
 C:\Users\Admin\Desktop\Doc2Pod\Doc2Pod-Backend\Domain\bin\Debug\net8.0\Domain.pdb
@@ -87,4 +75,16 @@ D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Domain\obj\Debug\net8.0\Domai
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Domain\obj\Debug\net8.0\refint\Domain.dll
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Domain\obj\Debug\net8.0\Domain.pdb
 D:\Level 4\GP\Doc2PodFinal\Doc2Pod\Doc2Pod-Backend\Domain\obj\Debug\net8.0\ref\Domain.dll
+D:\visual-studio-programs\Doc2Pod\Domain\bin\Debug\net8.0\Domain.deps.json
+D:\visual-studio-programs\Doc2Pod\Domain\bin\Debug\net8.0\Domain.dll
+D:\visual-studio-programs\Doc2Pod\Domain\bin\Debug\net8.0\Domain.pdb
+D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.csproj.AssemblyReference.cache
+D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.AssemblyInfoInputs.cache
+D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.AssemblyInfo.cs
+D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.csproj.CoreCompileInputs.cache
 D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.sourcelink.json
+D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.dll
+D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\refint\Domain.dll
+D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\Domain.pdb
+D:\visual-studio-programs\Doc2Pod\Domain\obj\Debug\net8.0\ref\Domain.dll
