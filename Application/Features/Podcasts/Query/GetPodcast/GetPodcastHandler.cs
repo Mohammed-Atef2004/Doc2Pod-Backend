@@ -35,7 +35,7 @@ namespace Application.Features.Podcasts.Query.GetPodcast
 
 
                 var signedUrl = await _storageService
-                      .GetSignedUrlAsync("audios", audio.AudioPath);
+                      .GetSignedUrlAsync("Podcasts", audio.AudioPath);
 
                 var response = await _httpClient.GetAsync(
                     signedUrl,
