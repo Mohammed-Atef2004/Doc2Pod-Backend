@@ -65,6 +65,7 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddTransient<IEmailService, EmailService>();
+        services.AddDataProtection();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
         // 8. Register Python RAG Service & AI Integration
@@ -78,6 +79,7 @@ public static class DependencyInjection
 
         // 9. Register Mapper (AutoMapper)
         services.AddAutoMapper(typeof(PythonMappingProfile));
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
         return services;
     }

@@ -9,8 +9,10 @@ using Domain.Users;
 using Domain.Users.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using System.Net;
+using System.Text;
 
 namespace Application.Auth.Commands.Register 
 {
@@ -94,7 +96,9 @@ namespace Application.Auth.Commands.Register
                 Succeeded: true), ct);
 
             var token = await _identity.GenerateEmailConfirmationTokenAsync(identityId, ct);
-            var confirmationLink = $"{_apiSettings.BaseUrl}/api/auth/confirm-email?userId={user.Id}&token={WebUtility.UrlEncode(token)}";
+            byte[] tokenBytes = Encoding.UTF8.GetBytes(token);
+            string safeToken = WebEncoders.Base64UrlEncode(tokenBytes);
+            var confirmationLink = $"{_apiSettings.BaseUrl}/api/Authentication/confirm-email?userId={user.Id}&token={safeToken}";
             var emailResult2 = await _emailService.SendConfirmationEmailAsync(
                  user.Email.Value,
                  user.FullName.DisplayName,

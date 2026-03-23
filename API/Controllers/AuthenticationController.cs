@@ -10,6 +10,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 
 namespace API.Controllers
 {
@@ -55,13 +57,20 @@ namespace API.Controllers
             return Ok(result);
         }
 
-
-        [HttpPost("confirm-email")]
+        //API Design Issue 
+        [HttpGet("confirm-email")]
         [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> ConfirmEmail([FromQuery] Guid userId, [FromQuery] string token, CancellationToken ct)
         {
-            var result = await _mediator.Send(command, cancellationToken);
-            return Ok(result);
+            byte[] decodedBytes = WebEncoders.Base64UrlDecode(token);
+            string originalToken = Encoding.UTF8.GetString(decodedBytes);
+
+            var command = new ConfirmEmailCommand(userId, originalToken);
+            var result = await _mediator.Send(command, ct);
+
+            return result.IsSuccess
+                ? Ok("Email confirmed successfully! You can now login.")
+                : BadRequest(result.Error);
         }
 
         [HttpPost("confirm-email-change")]

@@ -118,7 +118,7 @@ namespace Application.Features.Users.Commands.Profile.ChangeEmail
                 return checkResult;
 
             var token = await _identityService.GenerateChangeEmailTokenAsync(user.IdentityId, command.NewEmail, ct);
-            var confirmationLink = $"{_apiSettings.BaseUrl}/api/auth/confirm-email-change?" +
+            var confirmationLink = $"{_apiSettings.BaseUrl}/api/authentication/confirm-email-change?" +
                                        $"userId={user.Id}&" +
                                        $"newEmail={WebUtility.UrlEncode(command.NewEmail)}&" +
                                        $"token={WebUtility.UrlEncode(token)}";

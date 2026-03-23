@@ -13,37 +13,20 @@ namespace Infrastructure.Repositories
         {
             _context = context;
         }
+        public Task<bool> ExistsByEmailAsync(Email email, CancellationToken ct = default)
+            => _context.Users
+                .AnyAsync(u => u.Email == email, ct);
 
-        public async Task<bool> ExistsByEmailAsync(Email email, CancellationToken ct = default)
-        {
-            var emailValue = email.Value;
-            return await _context.Users
-                .FromSqlRaw("SELECT * FROM DomainUsers WHERE Email = {0}", emailValue)
-                .AnyAsync(ct);
-        }
-
-        public async Task<bool> ExistsByUsernameAsync(Username username, CancellationToken ct = default)
-        {
-            var usernameValue = username.Value;
-            return await _context.Users
-                .FromSqlRaw("SELECT * FROM DomainUsers WHERE Username = {0}", usernameValue)
-                .AnyAsync(ct);
-        }
+        public Task<bool> ExistsByUsernameAsync(Username username, CancellationToken ct = default)
+            => _context.Users
+                .AnyAsync(u => u.Username == username, ct);
 
         public Task<User?> GetByEmailAsync(Email email, CancellationToken ct = default)
-        {
-            var emailValue = email.Value;
-            return _context.Users
-                .FromSqlRaw("SELECT * FROM DomainUsers WHERE Email = {0}", emailValue)
-                .FirstOrDefaultAsync(ct);
-        }
+            => _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email, ct);
 
         public Task<User?> GetByUsernameAsync(Username username, CancellationToken ct = default)
-        {
-            var usernameValue = username.Value;
-            return _context.Users
-                .FromSqlRaw("SELECT * FROM DomainUsers WHERE Username = {0}", usernameValue)
-                .FirstOrDefaultAsync(ct);
-        }
+            => _context.Users
+                .FirstOrDefaultAsync(u => u.Username == username, ct);
     }
 }
