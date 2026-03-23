@@ -3459,11 +3459,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Level 4\\GP\\Doc2PodFinal\\Doc2Pod\\Doc2Pod-Backend\\Domain\\Domain.csproj",
+      "projectUniqueName": "D:\\Level 4\\GP\\Doc2PodFinal22\\Doc2Pod\\Doc2Pod-Backend\\Domain\\Domain.csproj",
       "projectName": "Domain",
-      "projectPath": "D:\\Level 4\\GP\\Doc2PodFinal\\Doc2Pod\\Doc2Pod-Backend\\Domain\\Domain.csproj",
+      "projectPath": "D:\\Level 4\\GP\\Doc2PodFinal22\\Doc2Pod\\Doc2Pod-Backend\\Domain\\Domain.csproj",
       "packagesPath": "C:\\Users\\laila\\.nuget\\packages\\",
-      "outputPath": "D:\\Level 4\\GP\\Doc2PodFinal\\Doc2Pod\\Doc2Pod-Backend\\Domain\\obj\\",
+      "outputPath": "D:\\Level 4\\GP\\Doc2PodFinal22\\Doc2Pod\\Doc2Pod-Backend\\Domain\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

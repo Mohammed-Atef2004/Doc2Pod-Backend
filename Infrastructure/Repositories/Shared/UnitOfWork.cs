@@ -33,7 +33,6 @@ namespace Infrastructure.Repositories.Shared
 
         public async Task<int> RollbackAsync(CancellationToken cancellationToken = default)
         {
-            // Discard all tracked changes
             foreach (var entry in _context.ChangeTracker.Entries())
             {
                 switch (entry.State)
@@ -50,7 +49,7 @@ namespace Infrastructure.Repositories.Shared
                         break;
                 }
             }
-            await Task.CompletedTask; // Placeholder for any async operations if needed
+            await Task.CompletedTask; 
             return 0;
         }
     }

@@ -13,6 +13,9 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(p => p.ScriptPath)
                 .IsRequired();
 
+            builder.Property(p => p.AudioPath)
+                .IsRequired();
+
             builder.Property(p => p.Mode)
                 .IsRequired();
 

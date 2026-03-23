@@ -1,67 +1,116 @@
 ﻿using Application.Common.Exceptions;
-using Domain.Enums; 
-using Domain.Interfaces.Repositories;
-using Domain.Interfaces.Services;
+using Application.Features.Podcasts.DTOs.Requests;
+using Application.Features.Podcasts.DTOs.Responses;
+using Application.Interfaces;
 using Domain.Entities;
+using Domain.Interfaces.Repositories;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection; 
+using System.Net.Http;
 
 namespace Application.Features.Podcasts.Commands.GeneratePodcast
 {
     public class GeneratePodcastHandler : IRequestHandler<GeneratePodcastCommand, Guid>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IFileStorageService _fileStorageService;
-        private readonly IPythonRagService _pythonRagService;
+        private readonly IPythonRagService _ragService;
+        private readonly IServiceScopeFactory _scopeFactory; 
 
         public GeneratePodcastHandler(
+            IPythonRagService ragService,
             IUnitOfWork unitOfWork,
-            IFileStorageService fileStorageService,
-            IPythonRagService pythonRagService)
+            IServiceScopeFactory scopeFactory) 
         {
+            _ragService = ragService;
             _unitOfWork = unitOfWork;
-            _fileStorageService = fileStorageService;
-            _pythonRagService = pythonRagService;
+            _scopeFactory = scopeFactory;
         }
 
-        public async Task<Guid> Handle(GeneratePodcastCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(GeneratePodcastCommand command, CancellationToken cancellationToken)
         {
-            var document = await _unitOfWork.Document.GetByIdAsync(request.DocumentId);
+            
+            var initialDocument = await _unitOfWork.Document.GetByIdAsync(command.DocumentId);
 
-            if (document == null)
-                throw new NotFoundException(nameof(Document), request.DocumentId);
+            if (initialDocument == null)
+                throw new NotFoundException(nameof(Document), command.DocumentId);
 
-            var script = await _pythonRagService.GeneratePodcastAsync(
-                document.FilePath,
-                (int)request.Mode,
-                request.Topic,
-                request.StartPage,
-                request.EndPage
-            );
+            var request = new GeneratePodcastRequest
+            {
+                FileKey = initialDocument.FilePath,
+                Mode = (int)command.Mode,
+                Topic = command.Topic,
+                StartPage = command.StartPage,
+                EndPage = command.EndPage
+            };
 
-            var uniqueId = Guid.NewGuid().ToString("N").Substring(0, 8);
-            var fileName = $"podcast_mode{(int)request.Mode}_{uniqueId}.txt";
+            
+            var taskId = await _ragService.StartGenerationAsync(request);
+            PodcastGenerationStatusResponse status = null;
 
-            var scriptPath = await _fileStorageService.SavePodcastScriptAsync(
-                request.DocumentId,
-                script,
-                fileName
-            );
+            int maxRetries = 800;
 
+            while (maxRetries > 0)
+            {
+                maxRetries--;
+                await Task.Delay(TimeSpan.FromSeconds(15), cancellationToken);
 
-            var podcast = document.AddPodcast(
-                (PodcastMode)request.Mode,
-                request.Topic,
-                request.StartPage,
-                request.EndPage,
-                scriptPath
-            );
+                try
+                {
+                    status = await _ragService.GetStatusAsync(taskId);
 
-     
-            await _unitOfWork.Podcast.AddAsync(podcast);
+                    if (status.Status == "DONE")
+                    {
+                        break;
+                    }
+                    else if (status.Status == "ERROR")
+                    {
+                        throw new Exception($"AI Error: {status.Error}");
+                    }
+                }
+                catch (HttpRequestException)
+                {
+                    Console.WriteLine("Network blip from Cloudflare ignored. Retrying...");
+                    continue;
+                }
+                catch (TaskCanceledException)
+                {
+                    Console.WriteLine("Request timeout ignored. Retrying...");
+                    continue;
+                }
+            }
 
-            await _unitOfWork.CompleteAsync(cancellationToken);
+            if (status == null || status.Status != "DONE")
+                throw new Exception("Podcast generation timeout");
 
-            return podcast.Id;
+            if (string.IsNullOrEmpty(status.AudioPath))
+                throw new Exception("Audio path is NULL");
+
+            if (string.IsNullOrEmpty(status.ScriptPath))
+                throw new Exception("Script path is NULL");
+
+            
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var freshUnitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                var freshDocument = await freshUnitOfWork.Document.GetByIdAsync(command.DocumentId);
+
+                if (freshDocument == null)
+                    throw new NotFoundException(nameof(Document), command.DocumentId);
+
+                var podcast = freshDocument.AddPodcast(
+                    command.Mode,
+                    command.Topic,
+                    command.StartPage,
+                    command.EndPage,
+                    status.ScriptPath,
+                    status.AudioPath
+                );
+
+                await freshUnitOfWork.Podcast.AddAsync(podcast);
+                await freshUnitOfWork.CompleteAsync(cancellationToken);
+
+                return podcast.Id;
+            }
         }
     }
 }

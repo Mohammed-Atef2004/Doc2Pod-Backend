@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "KuwZyopixOs=",
+  "dgSpecHash": "SlaIzGFTPnw=",
   "success": true,
-  "projectFilePath": "D:\\Level 4\\GP\\Doc2PodFinal\\Doc2Pod\\Doc2Pod-Backend\\Domain\\Domain.csproj",
+  "projectFilePath": "D:\\Level 4\\GP\\Doc2PodFinal22\\Doc2Pod\\Doc2Pod-Backend\\Domain\\Domain.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\laila\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
     "C:\\Users\\laila\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.1\\automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",

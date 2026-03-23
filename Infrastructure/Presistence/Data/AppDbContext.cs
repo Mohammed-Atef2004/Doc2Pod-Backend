@@ -22,7 +22,6 @@ namespace Infrastructure.Presistence.Data
         {
             modelBuilder.Ignore<DomainEvent>();
 
-            // Apply all configurations automatically
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
             base.OnModelCreating(modelBuilder);

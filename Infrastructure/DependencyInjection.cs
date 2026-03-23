@@ -1,10 +1,11 @@
-﻿using Domain.Interfaces.Repositories;
-using Domain.Interfaces.Services;
+﻿using Application.Interfaces;
+using Domain.Interfaces.Repositories;
 using Infrastructure.Presistence.Data;
 using Infrastructure.Presistence.Interceptors;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.Shared;
 using Infrastructure.Services;
+using Infrastructure.Services.PythonService.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,7 +40,9 @@ namespace Infrastructure.Persistence
 
             //  5. Register Services
             services.AddScoped<IFileStorageService, FileStorageService>();
-            services.AddHttpClient<IPythonRagService, PythonRagService>();
+
+            ///  6.Register Mapper
+            services.AddAutoMapper(typeof(PythonMappingProfile));
 
             return services;
         }
