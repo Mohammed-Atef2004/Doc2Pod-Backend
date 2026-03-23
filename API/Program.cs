@@ -1,10 +1,9 @@
 ﻿using Application;
-using Domain.Interfaces.Services;
+using Application.Interfaces;
 using Infrastructure.Persistence;
 using Infrastructure.Presistence.Data;
-using Infrastructure.Services;
+using Infrastructure.Services.PythonService;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http;
 using WebApi.Middlewares;
 
 namespace API
@@ -26,14 +25,15 @@ namespace API
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
-        
+
             builder.Services.AddHttpClient<IPythonRagService, PythonRagService>(client =>
             {
-                var baseUrl = builder.Configuration["PythonAI:BaseUrl"];
+                var baseUrl = builder.Configuration["PythonService:BaseUrl"];
                 client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = System.Threading.Timeout.InfiniteTimeSpan;
-                client.DefaultRequestHeaders.Add("ngrok-skip-browser-warning", "true");
+
             });
+
 
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();

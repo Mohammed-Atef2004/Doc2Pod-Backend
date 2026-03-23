@@ -17,6 +17,22 @@
   },
   {
     "ContainingType": "API.Controllers.PodcastController",
+    "Method": "GetAudio",
+    "RelativePath": "api/podcast/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "API.Controllers.PodcastController",
     "Method": "Generate",
     "RelativePath": "api/podcast/generate",
     "HttpMethod": "POST",

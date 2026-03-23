@@ -1,4 +1,5 @@
 ﻿using Application.Features.Podcasts.Commands.GeneratePodcast;
+using Application.Features.Podcasts.Query.GetPodcast;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,5 +36,14 @@ namespace API.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAudio(Guid id)
+        {
+            var stream = await _mediator.Send(new GetPodcastQuery(id));
+            return File(stream, "audio/mpeg",
+                enableRangeProcessing: true
+            );
+
+        }
     }
 }

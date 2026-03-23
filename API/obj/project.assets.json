@@ -6665,11 +6665,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Level 4\\GP\\Doc2PodFinal\\Doc2Pod\\Doc2Pod-Backend\\API\\API.csproj",
+      "projectUniqueName": "D:\\Level 4\\GP\\Doc2PodFinal22\\Doc2Pod\\Doc2Pod-Backend\\API\\API.csproj",
       "projectName": "API",
-      "projectPath": "D:\\Level 4\\GP\\Doc2PodFinal\\Doc2Pod\\Doc2Pod-Backend\\API\\API.csproj",
+      "projectPath": "D:\\Level 4\\GP\\Doc2PodFinal22\\Doc2Pod\\Doc2Pod-Backend\\API\\API.csproj",
       "packagesPath": "C:\\Users\\laila\\.nuget\\packages\\",
-      "outputPath": "D:\\Level 4\\GP\\Doc2PodFinal\\Doc2Pod\\Doc2Pod-Backend\\API\\obj\\",
+      "outputPath": "D:\\Level 4\\GP\\Doc2PodFinal22\\Doc2Pod\\Doc2Pod-Backend\\API\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -6690,11 +6690,11 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "D:\\Level 4\\GP\\Doc2PodFinal\\Doc2Pod\\Doc2Pod-Backend\\Application\\Application.csproj": {
-              "projectPath": "D:\\Level 4\\GP\\Doc2PodFinal\\Doc2Pod\\Doc2Pod-Backend\\Application\\Application.csproj"
+            "D:\\Level 4\\GP\\Doc2PodFinal22\\Doc2Pod\\Doc2Pod-Backend\\Application\\Application.csproj": {
+              "projectPath": "D:\\Level 4\\GP\\Doc2PodFinal22\\Doc2Pod\\Doc2Pod-Backend\\Application\\Application.csproj"
             },
-            "D:\\Level 4\\GP\\Doc2PodFinal\\Doc2Pod\\Doc2Pod-Backend\\Infrastructure\\Infrastructure.csproj": {
-              "projectPath": "D:\\Level 4\\GP\\Doc2PodFinal\\Doc2Pod\\Doc2Pod-Backend\\Infrastructure\\Infrastructure.csproj"
+            "D:\\Level 4\\GP\\Doc2PodFinal22\\Doc2Pod\\Doc2Pod-Backend\\Infrastructure\\Infrastructure.csproj": {
+              "projectPath": "D:\\Level 4\\GP\\Doc2PodFinal22\\Doc2Pod\\Doc2Pod-Backend\\Infrastructure\\Infrastructure.csproj"
             }
           }
         }
