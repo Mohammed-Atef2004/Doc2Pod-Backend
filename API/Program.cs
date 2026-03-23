@@ -1,22 +1,16 @@
 ﻿using Application;
-<<<<<<< HEAD
 using Application.Interfaces;
-using Infrastructure.Persistence;
-using Infrastructure.Presistence.Data;
-using Infrastructure.Services.PythonService;
-using Microsoft.EntityFrameworkCore;
-=======
 using Domain.Interfaces.Services;
 using Infrastructure.Identity;
 using Infrastructure.Persistence;
 using Infrastructure.Presistence.Data;
 using Infrastructure.Services;
+using Infrastructure.Services.PythonService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
->>>>>>> master
 using WebApi.Middlewares;
 
 namespace API
@@ -28,42 +22,40 @@ namespace API
             var builder = WebApplication.CreateBuilder(args);
 
             // ==========================
-            // Controllers & Swagger
+            // 1. Controllers & Swagger
             // ==========================
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddLogging();
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-<<<<<<< HEAD
+
+            // ==========================
+            // 2. Database & Core Services
+            // ==========================
+            // بنسجل الـ DbContext هنا عشان الـ Identity يحس بيه
             builder.Services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
-
+            // تسجيل الـ Python Service (الخاصة بالـ Podcast Module)
             builder.Services.AddHttpClient<IPythonRagService, PythonRagService>(client =>
             {
                 var baseUrl = builder.Configuration["PythonService:BaseUrl"];
-                client.BaseAddress = new Uri(baseUrl);
+                client.BaseAddress = new Uri(baseUrl!);
                 client.Timeout = System.Threading.Timeout.InfiniteTimeSpan;
-
             });
 
-
-=======
-
-            // ==========================
-            // Infrastructure & Application
-            // ==========================
->>>>>>> master
+            // تسجيل طبقات الـ Clean Architecture
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
             builder.Services.AddMediatR(cfg =>
                 cfg.RegisterServicesFromAssembly(typeof(ApplicationAssemblyMarker).Assembly));
 
             // ==========================
-            // Identity Setup
+            // 3. Identity Setup
             // ==========================
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
@@ -80,7 +72,7 @@ namespace API
             builder.Services.AddScoped<IIdentityService, IdentityService>();
 
             // ==========================
-            // JWT Authentication
+            // 4. JWT Authentication
             // ==========================
             builder.Services.AddAuthentication(options =>
             {
@@ -102,16 +94,13 @@ namespace API
                 };
             });
 
-            // ==========================
-            // Authorization
-            // ==========================
             builder.Services.AddAuthorization();
             builder.Configuration.AddUserSecrets<Program>();
 
             var app = builder.Build();
 
             // ==========================
-            // Middleware
+            // 5. Middleware Pipeline
             // ==========================
             app.UseMiddleware<ExceptionHandlingMiddleware>();
 
@@ -119,9 +108,9 @@ namespace API
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+                app.UseDeveloperExceptionPage();
             }
 
-            app.UseDeveloperExceptionPage();
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
