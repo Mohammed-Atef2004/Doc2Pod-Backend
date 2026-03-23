@@ -1,0 +1,139 @@
+﻿using Application.Features.Users.Commands.Authentication.VerifyTwoFactor;
+using Application.Features.Users.Services;
+using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services;
+using Domain.SharedKernel;
+using Domain.Users;
+using Domain.Users.Errors;
+using Domain.Users.ValueObjects;
+using MediatR;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Application.Features.Users.Commands.Authentication.Login
+{
+    public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginResponse>>
+    {
+        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IIdentityService _identityService;
+        private readonly ITokenService _tokenService;
+        private readonly ITotpService _totpService;
+        private readonly IAuditService _auditService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+
+        public LoginCommandHandler(
+            IUserRepository userRepository,
+            IUnitOfWork unitOfWork,
+            IIdentityService identityService,
+            ITokenService tokenService,
+            ITotpService totpService,
+            IHttpContextAccessor httpContextAccessor,
+            IAuditService auditService)
+        {
+            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
+            _identityService = identityService;
+            _tokenService = tokenService;
+            _totpService = totpService;
+            _auditService = auditService;
+            _httpContextAccessor = httpContextAccessor;
+
+        }
+
+        public async Task<Result<LoginResponse>> Handle(LoginCommand command, CancellationToken ct)
+        {
+            var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+            var emailResult = Email.Create(command.Email);
+            if (emailResult.IsFailure)
+                return Result<LoginResponse>.Failure(emailResult.Error);
+
+            var user = await _userRepository.GetByEmailAsync(emailResult.Value, ct);
+            if (user is null)
+                return Result<LoginResponse>.Failure(UserErrors.NotFound);
+
+            var availabilityResult = user.CheckAvailability();
+            if (availabilityResult.IsFailure)
+                return Result<LoginResponse>.Failure(availabilityResult.Error);
+
+            if (!user.IsEmailConfirmed)
+                return Result<LoginResponse>.Failure(UserErrors.EmailNotConfirmed);
+
+            var passwordValid = await _identityService.CheckPasswordAsync(command.Email, command.Password, ct);
+
+            if (!passwordValid)
+            {
+                user.RecordFailedLogin(ipAddress);
+                _userRepository.Update(user);
+                await _unitOfWork.CompleteAsync(ct);
+                await _auditService.LogAsync(new AuditEntry(
+                    ActorId: user.Id,
+                    Action: AuditActions.UserLoginFailed,
+                    EntityType: nameof(User),
+                    EntityId: user.Id,
+                    IpAddress: ipAddress,
+                    Succeeded: false,
+                    FailureReason: "Invalid password attempt."), ct);
+
+                return Result<LoginResponse>.Failure(UserErrors.InvalidCredentials);
+            }
+
+            var loginResult = user.RecordSuccessfulLogin(ipAddress);
+            _userRepository.Update(user);
+            await _unitOfWork.CompleteAsync(ct);
+
+            if (user.IsTwoFactorEnabled)
+            {
+                string? qrCodeUri = null;
+                string? tempSecret = null;
+
+                if (user.RequiresTwoFactorReset)
+                {
+                    tempSecret = _totpService.GenerateSecret(); 
+                    qrCodeUri = _totpService.GenerateQrCodeUri(user.Email.Value, tempSecret);
+                }
+
+                return Result<LoginResponse>.Success(new LoginResponse(
+                    Token: null,
+                    UserId: user.Id,
+                    Username: user.Username.Value,
+                    Email: user.Email.Value,
+                    Role: user.Role.ToString(),
+                    RequiresTwoFactor: true,
+                    RequiresTwoFactorReset: user.RequiresTwoFactorReset,
+                    QrCodeUri: qrCodeUri,          
+                    NewTemporarySecret: tempSecret 
+                ));
+            }
+
+            await _auditService.LogAsync(new AuditEntry(
+                ActorId: user.Id,
+                Action: AuditActions.UserLogin,
+                EntityType: nameof(User),
+                EntityId: user.Id,
+                IpAddress: ipAddress,
+                Succeeded: true), ct);
+
+            var claims = new TokenClaims(
+                UserId: user.Id,
+                Email: user.Email.Value,
+                Username: user.Username.Value,
+                Role: user.Role.ToString());
+
+            return Result<LoginResponse>.Success(new LoginResponse(
+                Token: _tokenService.GenerateAccessToken(claims),
+                UserId: user.Id,
+                Username: user.Username.Value,
+                Email: user.Email.Value,
+                Role: user.Role.ToString(),
+                RequiresTwoFactor: false));
+        }
+    }
+
+}

@@ -8,10 +8,13 @@
 
   <ItemGroup>
     <Compile Remove="Common\Abstractions\**" />
+    <Compile Remove="Common\Interfaces\**" />
     <Compile Remove="Common\Models\**" />
     <EmbeddedResource Remove="Common\Abstractions\**" />
+    <EmbeddedResource Remove="Common\Interfaces\**" />
     <EmbeddedResource Remove="Common\Models\**" />
     <None Remove="Common\Abstractions\**" />
+    <None Remove="Common\Interfaces\**" />
     <None Remove="Common\Models\**" />
   </ItemGroup>
 
@@ -20,14 +23,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Interfaces\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="AWSSDK.Core" Version="4.0.3.6" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="MailKit" Version="4.15.1" />
 	  <PackageReference Include="MediatR" Version="14.0.0" />
 	  <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.9" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" />
