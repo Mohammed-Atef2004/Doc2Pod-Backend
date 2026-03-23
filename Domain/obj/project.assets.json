@@ -3453,23 +3453,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\laila\\.nuget\\packages\\": {},
+    "D:\\NuGet_Cache": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Level 4\\GP\\Doc2PodFinal22\\Doc2Pod\\Doc2Pod-Backend\\Domain\\Domain.csproj",
+      "projectUniqueName": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Domain\\Domain.csproj",
       "projectName": "Domain",
-      "projectPath": "D:\\Level 4\\GP\\Doc2PodFinal22\\Doc2Pod\\Doc2Pod-Backend\\Domain\\Domain.csproj",
-      "packagesPath": "C:\\Users\\laila\\.nuget\\packages\\",
-      "outputPath": "D:\\Level 4\\GP\\Doc2PodFinal22\\Doc2Pod\\Doc2Pod-Backend\\Domain\\obj\\",
+      "projectPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Domain\\Domain.csproj",
+      "packagesPath": "D:\\NuGet_Cache",
+      "outputPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Domain\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\laila\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\moham\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
