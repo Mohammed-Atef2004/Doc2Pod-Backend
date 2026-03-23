@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\visual-studio-programs\\Doc2Pod\\API\\API.csproj": {}
+    "D:\\visual-studio-programs\\Doc2Pod-Backend\\API\\API.csproj": {}
   },
   "projects": {
-    "D:\\visual-studio-programs\\Doc2Pod\\API\\API.csproj": {
+    "D:\\visual-studio-programs\\Doc2Pod-Backend\\API\\API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\visual-studio-programs\\Doc2Pod\\API\\API.csproj",
+        "projectUniqueName": "D:\\visual-studio-programs\\Doc2Pod-Backend\\API\\API.csproj",
         "projectName": "API",
-        "projectPath": "D:\\visual-studio-programs\\Doc2Pod\\API\\API.csproj",
+        "projectPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\API\\API.csproj",
         "packagesPath": "D:\\NuGet_Cache",
-        "outputPath": "D:\\visual-studio-programs\\Doc2Pod\\API\\obj\\",
+        "outputPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\API\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -32,11 +32,11 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "D:\\visual-studio-programs\\Doc2Pod\\Application\\Application.csproj": {
-                "projectPath": "D:\\visual-studio-programs\\Doc2Pod\\Application\\Application.csproj"
+              "D:\\visual-studio-programs\\Doc2Pod-Backend\\Application\\Application.csproj": {
+                "projectPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Application\\Application.csproj"
               },
-              "D:\\visual-studio-programs\\Doc2Pod\\Infrastructure\\Infrastructure.csproj": {
-                "projectPath": "D:\\visual-studio-programs\\Doc2Pod\\Infrastructure\\Infrastructure.csproj"
+              "D:\\visual-studio-programs\\Doc2Pod-Backend\\Infrastructure\\Infrastructure.csproj": {
+                "projectPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Infrastructure\\Infrastructure.csproj"
               }
             }
           }
@@ -111,14 +111,14 @@
         }
       }
     },
-    "D:\\visual-studio-programs\\Doc2Pod\\Application\\Application.csproj": {
+    "D:\\visual-studio-programs\\Doc2Pod-Backend\\Application\\Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\visual-studio-programs\\Doc2Pod\\Application\\Application.csproj",
+        "projectUniqueName": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Application\\Application.csproj",
         "projectName": "Application",
-        "projectPath": "D:\\visual-studio-programs\\Doc2Pod\\Application\\Application.csproj",
+        "projectPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Application\\Application.csproj",
         "packagesPath": "D:\\NuGet_Cache",
-        "outputPath": "D:\\visual-studio-programs\\Doc2Pod\\Application\\obj\\",
+        "outputPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Application\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -139,8 +139,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\visual-studio-programs\\Doc2Pod\\Domain\\Domain.csproj": {
-                "projectPath": "D:\\visual-studio-programs\\Doc2Pod\\Domain\\Domain.csproj"
+              "D:\\visual-studio-programs\\Doc2Pod-Backend\\Domain\\Domain.csproj": {
+                "projectPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Domain\\Domain.csproj"
               }
             }
           }
@@ -222,14 +222,14 @@
         }
       }
     },
-    "D:\\visual-studio-programs\\Doc2Pod\\Domain\\Domain.csproj": {
+    "D:\\visual-studio-programs\\Doc2Pod-Backend\\Domain\\Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\visual-studio-programs\\Doc2Pod\\Domain\\Domain.csproj",
+        "projectUniqueName": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Domain\\Domain.csproj",
         "projectName": "Domain",
-        "projectPath": "D:\\visual-studio-programs\\Doc2Pod\\Domain\\Domain.csproj",
+        "projectPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Domain\\Domain.csproj",
         "packagesPath": "D:\\NuGet_Cache",
-        "outputPath": "D:\\visual-studio-programs\\Doc2Pod\\Domain\\obj\\",
+        "outputPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -317,14 +317,14 @@
         }
       }
     },
-    "D:\\visual-studio-programs\\Doc2Pod\\Infrastructure\\Infrastructure.csproj": {
+    "D:\\visual-studio-programs\\Doc2Pod-Backend\\Infrastructure\\Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\visual-studio-programs\\Doc2Pod\\Infrastructure\\Infrastructure.csproj",
+        "projectUniqueName": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Infrastructure\\Infrastructure.csproj",
         "projectName": "Infrastructure",
-        "projectPath": "D:\\visual-studio-programs\\Doc2Pod\\Infrastructure\\Infrastructure.csproj",
+        "projectPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Infrastructure\\Infrastructure.csproj",
         "packagesPath": "D:\\NuGet_Cache",
-        "outputPath": "D:\\visual-studio-programs\\Doc2Pod\\Infrastructure\\obj\\",
+        "outputPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -345,11 +345,11 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "D:\\visual-studio-programs\\Doc2Pod\\Application\\Application.csproj": {
-                "projectPath": "D:\\visual-studio-programs\\Doc2Pod\\Application\\Application.csproj"
+              "D:\\visual-studio-programs\\Doc2Pod-Backend\\Application\\Application.csproj": {
+                "projectPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Application\\Application.csproj"
               },
-              "D:\\visual-studio-programs\\Doc2Pod\\Domain\\Domain.csproj": {
-                "projectPath": "D:\\visual-studio-programs\\Doc2Pod\\Domain\\Domain.csproj"
+              "D:\\visual-studio-programs\\Doc2Pod-Backend\\Domain\\Domain.csproj": {
+                "projectPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Domain\\Domain.csproj"
               }
             }
           }

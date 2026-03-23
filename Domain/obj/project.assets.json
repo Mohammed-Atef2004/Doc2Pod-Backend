@@ -3459,11 +3459,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\visual-studio-programs\\Doc2Pod\\Domain\\Domain.csproj",
+      "projectUniqueName": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Domain\\Domain.csproj",
       "projectName": "Domain",
-      "projectPath": "D:\\visual-studio-programs\\Doc2Pod\\Domain\\Domain.csproj",
+      "projectPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Domain\\Domain.csproj",
       "packagesPath": "D:\\NuGet_Cache",
-      "outputPath": "D:\\visual-studio-programs\\Doc2Pod\\Domain\\obj\\",
+      "outputPath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\Domain\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

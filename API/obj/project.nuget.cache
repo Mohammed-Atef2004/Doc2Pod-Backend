@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "tM1FUj9raa4=",
+  "dgSpecHash": "X69el4yYMJw=",
   "success": true,
-  "projectFilePath": "D:\\visual-studio-programs\\Doc2Pod\\API\\API.csproj",
+  "projectFilePath": "D:\\visual-studio-programs\\Doc2Pod-Backend\\API\\API.csproj",
   "expectedPackageFiles": [
     "D:\\NuGet_Cache\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
     "D:\\NuGet_Cache\\automapper.extensions.microsoft.dependencyinjection\\12.0.1\\automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",
