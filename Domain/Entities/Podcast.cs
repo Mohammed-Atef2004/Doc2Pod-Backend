@@ -3,7 +3,7 @@ using Domain.SharedKernel;
 
 namespace Domain.Entities
 {
-    public class Podcast : Entity<Guid>
+    public class Podcast : Entity<Guid>, ISoftDeletable
     {
         public Guid DocumentId { get; private set; }
 
@@ -17,6 +17,8 @@ namespace Domain.Entities
 
         public string ScriptPath { get; private set; }
 
+        public string AudioPath { get; private set; }
+
         public Document Document { get; private set; }
 
         private Podcast() { }
@@ -27,7 +29,8 @@ namespace Domain.Entities
             string? topic,
             int? startPage,
             int? endPage,
-            string scriptPath)
+            string scriptPath,
+            string audioPath)
         {
             Id = Guid.NewGuid();
             DocumentId = documentId;
@@ -36,6 +39,7 @@ namespace Domain.Entities
             StartPage = startPage;
             EndPage = endPage;
             ScriptPath = scriptPath;
+            AudioPath = audioPath;
         }
     }
 }

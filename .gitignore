@@ -2,4 +2,5 @@
 [Oo]bj/
 .vs/
 *.user
-
+*.dll
+*.exe

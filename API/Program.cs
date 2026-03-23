@@ -1,4 +1,11 @@
 ﻿using Application;
+<<<<<<< HEAD
+using Application.Interfaces;
+using Infrastructure.Persistence;
+using Infrastructure.Presistence.Data;
+using Infrastructure.Services.PythonService;
+using Microsoft.EntityFrameworkCore;
+=======
 using Domain.Interfaces.Services;
 using Infrastructure.Identity;
 using Infrastructure.Persistence;
@@ -9,6 +16,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+>>>>>>> master
 using WebApi.Middlewares;
 
 namespace API
@@ -27,10 +35,28 @@ namespace API
             builder.Services.AddSwaggerGen();
             builder.Services.AddLogging();
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+<<<<<<< HEAD
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
+
+
+            builder.Services.AddHttpClient<IPythonRagService, PythonRagService>(client =>
+            {
+                var baseUrl = builder.Configuration["PythonService:BaseUrl"];
+                client.BaseAddress = new Uri(baseUrl);
+                client.Timeout = System.Threading.Timeout.InfiniteTimeSpan;
+
+            });
+
+
+=======
 
             // ==========================
             // Infrastructure & Application
             // ==========================
+>>>>>>> master
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
             builder.Services.AddMediatR(cfg =>

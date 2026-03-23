@@ -1,6 +1,6 @@
-﻿using Domain.Entities;
+﻿using Application.Interfaces;
+using Domain.Entities;
 using Domain.Interfaces.Repositories;
-using Domain.Interfaces.Services;
 using MediatR;
 
 namespace Application.Features.Documents.Commands.UploadDocument

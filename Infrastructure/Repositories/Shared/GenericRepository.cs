@@ -18,7 +18,6 @@ namespace Infrastructure.Repositories.Shared
             _dbSet = context.Set<T>();
         }
 
-        // Always NoTracking for better read performance
         public virtual IQueryable<T> EntityQuery => _dbSet.AsNoTracking();
 
         public async Task<T?> GetByIdAsync(object id)

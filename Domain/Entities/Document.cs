@@ -1,9 +1,9 @@
-﻿using Domain.SharedKernel;
-using Domain.Enums;
+﻿using Domain.Enums;
+using Domain.SharedKernel;
 
 namespace Domain.Entities
 {
-    public class Document : Entity<Guid>
+    public class Document : Entity<Guid>, ISoftDeletable
     {
         public string FileName { get; private set; }
         public string FilePath { get; private set; }
@@ -21,15 +21,20 @@ namespace Domain.Entities
             UploadedAt = DateTime.UtcNow;
         }
 
-        public Podcast AddPodcast(PodcastMode mode, string? topic, int? startPage, int? endPage, string scriptPath)
+        public Podcast AddPodcast(PodcastMode mode, string? topic, int? startPage, int? endPage, string scriptPath, string audioPath)
         {
+
+            if (_podcasts.Any(p => p.Mode == mode))
+                throw new Exception("Podcast already exists for this mode");
+
             var podcast = new Podcast(
-                this.Id,
+                Id,
                 mode,
                 topic,
                 startPage,
                 endPage,
-                scriptPath
+                scriptPath,
+                audioPath
             );
 
             _podcasts.Add(podcast);
