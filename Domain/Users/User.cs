@@ -41,33 +41,13 @@ public sealed class User : AggregateRoot<Guid>
     // ─── 2FA ───────────────────────────────────────────────────────────────────
 
     public bool IsTwoFactorEnabled { get; private set; }
-    public bool RequiresTwoFactorReset { get; private set; }
 
     /// <summary>
     /// Base-32 TOTP secret.  Stored encrypted at-rest by the Infrastructure layer.
     /// Exposed here as a plain string so the domain stays persistence-ignorant.
     /// </summary>
     public string? TwoFactorSecret { get; private set; }
-    public void MarkTwoFactorForReset()
-    {
-        if (IsTwoFactorEnabled)
-        {
-            RequiresTwoFactorReset = true;
-        }
-    }
 
-    public Result CompleteTwoFactorReset(string newSecret)
-    {
-        if (string.IsNullOrWhiteSpace(newSecret))
-            return Result.Failure(SecurityErrors.InvalidTwoFactorSecret);
-
-        TwoFactorSecret = newSecret;
-        RequiresTwoFactorReset = false; 
-        IsTwoFactorEnabled = true;
-
-        AddDomainEvent(new UserTwoFactorEnabledDomainEvent(Id));
-        return Result.Success();
-    }
     // ─── Password History ──────────────────────────────────────────────────────
 
     /// <summary>
@@ -204,10 +184,6 @@ public sealed class User : AggregateRoot<Guid>
             return checkResult;
         var oldEmail = Email.Value;
         Email = newEmail;
-        if (IsTwoFactorEnabled)
-        {
-            MarkTwoFactorForReset();
-        }
         AddDomainEvent(new UserEmailChangedDomainEvent(Id, oldEmail, Email.Value));
         return Result.Success();
     }

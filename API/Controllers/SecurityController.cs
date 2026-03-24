@@ -1,5 +1,7 @@
-﻿using Application.Features.Users.Commands.Security.Disable2FA;
-using Application.Features.Users.Commands.Security.Enable2FA;
+﻿using Application.Features.Users.Commands.Security.Confirm2FASetup;
+using Application.Features.Users.Commands.Security.Disable2FA;
+using Application.Features.Users.Commands.Security.Setup2FA;
+using MassTransit.Mediator;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,37 +19,35 @@ public sealed class SecurityController : ControllerBase
     public SecurityController(ISender sender) => _sender = sender;
 
     private Guid CurrentUserId =>
-        Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        Guid.Parse(User.FindFirstValue("sub") ?? throw new UnauthorizedAccessException());
 
-    // ─── POST api/security/2fa/enable ─────────────────────────────────────────
-
-    [HttpPost("2fa/enable")]
-    public async Task<IActionResult> Enable2FA(
-        [FromBody] Enable2FARequest request,
-        CancellationToken ct)
+    [HttpGet("setup-2fa")]
+    public async Task<IActionResult> SetupTwoFactor(CancellationToken ct)
     {
-        var result = await _sender.Send(
-            new Enable2FACommand(CurrentUserId, request.TotpCode), ct);
-
-        return result.IsSuccess
-            ? Ok(result.Value)
-            : BadRequest(result.Error);
+        var result = await _sender.Send(new Setup2FACommand(CurrentUserId), ct);
+        if (result.IsSuccess)
+            return Ok("2FA setup initiated successfully. Scan the QR code.");
+        return BadRequest(result.Error);
     }
-
-    // ─── POST api/security/2fa/disable ────────────────────────────────────────
+    [HttpPost("confirm-2fa-setup")]
+    public async Task<IActionResult> ConfirmTwoFactorSetup([FromBody] Confirm2FASetupRequest request, CancellationToken ct)
+    {
+        var result = await _sender.Send(new Confirm2FASetupCommand(
+            CurrentUserId,
+            request.TotpCode,
+            request.NewSecret), ct);
+        if (result.IsSuccess)
+            return Ok("Two-Factor Authentication has been enabled successfully!");
+        return BadRequest(result.Error);
+    }
 
     [HttpPost("2fa/disable")]
     public async Task<IActionResult> Disable2FA(CancellationToken ct)
     {
-        var result = await _sender.Send(
-            new Disable2FACommand(CurrentUserId), ct);
-
-        return result.IsSuccess
-            ? NoContent()
-            : BadRequest(result.Error);
+        var result = await _sender.Send(new Disable2FACommand(CurrentUserId), ct);
+        if (result.IsSuccess)
+            return NoContent();
+        return BadRequest(result.Error);
     }
 }
-
-// ─── Request DTOs ─────────────────────────────────────────────────────────────
-
-public sealed record Enable2FARequest(string TotpCode);
+public record Confirm2FASetupRequest(string TotpCode, string NewSecret);

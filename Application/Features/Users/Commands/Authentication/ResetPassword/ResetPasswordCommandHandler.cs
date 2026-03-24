@@ -25,13 +25,13 @@ namespace Application.Features.Users.Commands.Authentication.ResetPassword
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ResetPasswordCommandHandler(
-            IUserRepository userRepository,
-            IIdentityService identityService,
-            IPasswordHasher passwordHasher,
-            IAuditService auditService,
-            IUnitOfWork unitOfWork,
-            ITotpService totpService,
-            IHttpContextAccessor httpContextAccessor)
+          IUserRepository userRepository,
+          IIdentityService identityService,
+          IPasswordHasher passwordHasher,
+          IAuditService auditService,
+          IUnitOfWork unitOfWork,
+          ITotpService totpService,
+          IHttpContextAccessor httpContextAccessor)
         {
             _userRepository = userRepository;
             _identityService = identityService;
@@ -47,50 +47,29 @@ namespace Application.Features.Users.Commands.Authentication.ResetPassword
             var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
             var user = await _userRepository.GetByIdAsync(command.UserId);
-            if (user is null) 
+            if (user is null)
                 return Result.Failure(UserErrors.NotFound);
-
-            if (user.IsTwoFactorEnabled)
-            {
-                if (string.IsNullOrEmpty(command.TwoFactorCode))
-                    return Result.Failure(UserErrors.SecurityErrors.InvalidTwoFactorSecret);
-
-                if (!_totpService.Verify(user.TwoFactorSecret!, command.TwoFactorCode))
-                {
-                    await _auditService.LogAsync(new AuditEntry(
-                        ActorId: user.Id,
-                        Action: AuditActions.UserResetPassword,
-                        EntityType: "User",
-                        EntityId: user.Id,
-                        IpAddress: ipAddress,
-                        Succeeded: false,
-                        FailureReason: "2FA verification failed during password reset."
-                    ), ct);
-                    await _unitOfWork.CompleteAsync(ct);
-                    return Result.Failure(UserErrors.SecurityErrors.InvalidTotpCode);
-                }
-            }
 
             if (user.PasswordHashes.Any(h => _passwordHasher.VerifyPassword(command.NewPassword, h)))
             {
                 return Result.Failure(UserErrors.SecurityErrors.PasswordAlreadyUsed);
             }
             var identityResult = await _identityService.ResetPasswordAsync(
-                user.IdentityId,
-                command.Token,
-                command.NewPassword,
-                ct);
+              user.IdentityId,
+              command.Token,
+              command.NewPassword,
+              ct);
 
             if (identityResult.IsFailure)
             {
                 await _auditService.LogAsync(new AuditEntry(
-                    ActorId: user.Id,
-                    Action: AuditActions.UserResetPassword,
-                    EntityType: "User",
-                    EntityId: user.Id,
-                    IpAddress: ipAddress,
-                    Succeeded: false,
-                    FailureReason: identityResult.Error.Message
+                  ActorId: user.Id,
+                  Action: AuditActions.UserResetPassword,
+                  EntityType: "User",
+                  EntityId: user.Id,
+                  IpAddress: ipAddress,
+                  Succeeded: false,
+                  FailureReason: identityResult.Error.Message
                 ), ct);
                 await _unitOfWork.CompleteAsync(ct);
                 return Result.Failure(identityResult.Error);
@@ -101,12 +80,12 @@ namespace Application.Features.Users.Commands.Authentication.ResetPassword
             await _unitOfWork.CompleteAsync(ct);
 
             await _auditService.LogAsync(new AuditEntry(
-                ActorId: user.Id,
-                Action: AuditActions.UserResetPassword,
-                EntityType: "User",
-                EntityId: user.Id,
-                IpAddress: ipAddress,
-                Succeeded: true
+              ActorId: user.Id,
+              Action: AuditActions.UserResetPassword,
+              EntityType: "User",
+              EntityId: user.Id,
+              IpAddress: ipAddress,
+              Succeeded: true
             ), ct);
             return Result.Success();
         }

@@ -9,13 +9,7 @@ namespace Application.Features.Users.Commands.Authentication.VerifyTwoFactor
     public record LoginResponse(
         string? Token,
         Guid UserId,
-        string Username,
-        string Email,
-        string Role,
-        bool RequiresTwoFactor,
-        bool RequiresTwoFactorReset = false, 
-        string? QrCodeUri = null,
-        string? NewTemporarySecret = null
+        bool RequiresTwoFactor
     );
 }
 

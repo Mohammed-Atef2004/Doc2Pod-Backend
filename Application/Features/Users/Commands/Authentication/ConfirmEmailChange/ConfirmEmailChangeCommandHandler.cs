@@ -16,7 +16,7 @@ using static Domain.Users.Errors.UserErrors;
 
 namespace Application.Features.Users.Commands.Authentication.ConfirmEmailChange
 {
-    public sealed class ConfirmEmailChangeCommandHandler : IRequestHandler<ConfirmEmailChangeCommand, Result<ConfirmEmailChangeResponse>>
+    public sealed class ConfirmEmailChangeCommandHandler : IRequestHandler<ConfirmEmailChangeCommand, Result<string>>
     {
         private readonly IUserRepository _userRepository;
         private readonly IIdentityService _identityService;
@@ -41,12 +41,12 @@ namespace Application.Features.Users.Commands.Authentication.ConfirmEmailChange
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<Result<ConfirmEmailChangeResponse>> Handle(ConfirmEmailChangeCommand command, CancellationToken ct)
+        public async Task<Result<string>> Handle(ConfirmEmailChangeCommand command, CancellationToken ct)
         {
             var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "unknown";
             var user = await _userRepository.GetByIdAsync(command.UserId);
             if (user is null) 
-                return Result<ConfirmEmailChangeResponse>.Failure(UserErrors.NotFound);
+                return Result<string>.Failure(UserErrors.NotFound);
 
             var identityResult = await _identityService.ConfirmEmailChangeAsync(
                 user.IdentityId,
@@ -55,12 +55,12 @@ namespace Application.Features.Users.Commands.Authentication.ConfirmEmailChange
                 ct);
 
             if (identityResult.IsFailure)
-                return Result<ConfirmEmailChangeResponse>.Failure(identityResult.Error);
+                return Result<string>.Failure(identityResult.Error);
             var newMail = Email.Create(command.NewEmail).Value;
 
             var updateResult = user.UpdateEmail(newMail, isEmailTaken: false);
             if (updateResult.IsFailure)
-                return Result<ConfirmEmailChangeResponse>.Failure(updateResult.Error);
+                return Result<string>.Failure(updateResult.Error);
 
             _userRepository.Update(user);
             await _unitOfWork.CompleteAsync(ct);
@@ -80,10 +80,7 @@ namespace Application.Features.Users.Commands.Authentication.ConfirmEmailChange
             Role: user.Role.ToString());
 
             var token = _tokenService.GenerateAccessToken(claims);
-            return Result<ConfirmEmailChangeResponse>.Success(new ConfirmEmailChangeResponse(
-                    Token: token,
-                    Message: "Email changed and confirmed successfully. Please re-link your 2FA app on next login if enabled."
-                ));
+            return Result<string>.Success(token);
         }
     }
 }

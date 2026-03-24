@@ -19,5 +19,7 @@ namespace Domain.Interfaces.Services
 
         Task<Result> SendEmailChangeConfirmationAsync(string email, string name, string link, CancellationToken ct = default);
 
+        Task<Result> SendActivationReminderEmailAsync(string email, string name, string link, CancellationToken ct = default);
+
     }
 }

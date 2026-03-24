@@ -9,6 +9,7 @@ using Domain.Users.Errors;
 using Domain.Users.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -28,20 +29,20 @@ namespace Application.Features.Users.Commands.Profile.ChangeEmail
         private readonly IIdentityService _identityService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailService _emailService;
-        private readonly ITotpService _totpService; 
+        private readonly ITotpService _totpService;
         private readonly IAuditService _auditService;
         private readonly ApiSettings _apiSettings;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ChangeEmailCommandHandler(
-            IUserRepository userRepository,
-            IIdentityService identityService,
-            IUnitOfWork unitOfWork,
-            IEmailService emailService,
-            ITotpService totpService,
-            IAuditService auditService,
-            IHttpContextAccessor httpContextAccessor,
-            IOptions<ApiSettings> apiOptions)
+          IUserRepository userRepository,
+          IIdentityService identityService,
+          IUnitOfWork unitOfWork,
+          IEmailService emailService,
+          ITotpService totpService,
+          IAuditService auditService,
+          IHttpContextAccessor httpContextAccessor,
+          IOptions<ApiSettings> apiOptions)
         {
             _userRepository = userRepository;
             _identityService = identityService;
@@ -73,14 +74,14 @@ namespace Application.Features.Users.Commands.Profile.ChangeEmail
                 await _unitOfWork.CompleteAsync(ct);
 
                 await _auditService.LogAsync(new AuditEntry
-                    (
-                    ActorId: user.Id,
-                    Action: AuditActions.UserEmailChangeFailed,
-                    EntityType: nameof(User),
-                    EntityId: user.Id,
-                    IpAddress: ipAddress,
-                    Succeeded: false,
-                    "Invalid password during email change."), ct);
+                  (
+                  ActorId: user.Id,
+                  Action: AuditActions.UserEmailChangeFailed,
+                  EntityType: nameof(User),
+                  EntityId: user.Id,
+                  IpAddress: ipAddress,
+                  Succeeded: false,
+                  "Invalid password during email change."), ct);
 
                 return Result.Failure(UserErrors.InvalidCredentials);
             }
@@ -105,7 +106,7 @@ namespace Application.Features.Users.Commands.Profile.ChangeEmail
 
 
             var newEmailResult = Email.Create(command.NewEmail);
-            if (newEmailResult.IsFailure) 
+            if (newEmailResult.IsFailure)
                 return Result.Failure(newEmailResult.Error);
 
             if (user.Email.Value == newEmailResult.Value.Value)
@@ -118,21 +119,29 @@ namespace Application.Features.Users.Commands.Profile.ChangeEmail
                 return checkResult;
 
             var token = await _identityService.GenerateChangeEmailTokenAsync(user.IdentityId, command.NewEmail, ct);
+            byte[] tokenBytes = Encoding.UTF8.GetBytes(token);
+            string safeToken = WebEncoders.Base64UrlEncode(tokenBytes);
+            string safeEmail = WebUtility.UrlEncode(command.NewEmail);
             var confirmationLink = $"{_apiSettings.BaseUrl}/api/authentication/confirm-email-change?" +
-                                       $"userId={user.Id}&" +
-                                       $"newEmail={WebUtility.UrlEncode(command.NewEmail)}&" +
-                                       $"token={WebUtility.UrlEncode(token)}";
-
-
-            await _emailService.SendEmailChangeWarningAsync
-                (user.Email.Value,
-                user.FullName.DisplayName,
-                ct);
-            await _emailService.SendEmailChangeConfirmationAsync
-                (command.NewEmail
-                , user.FullName.DisplayName,
-                confirmationLink, ct);
-
+                                   $"userId={user.Id}&" +
+                                   $"newEmail={safeEmail}&" +
+                                   $"token={safeToken}";
+            var warningResult =await _emailService.SendEmailChangeWarningAsync
+              (user.Email.Value,
+              user.FullName.DisplayName,
+              ct);
+            if (warningResult.IsFailure)
+            {
+                return Result<Guid>.Failure(warningResult.Error);
+            }
+            var changeMailResult =await _emailService.SendEmailChangeConfirmationAsync
+              (command.NewEmail
+              , user.FullName.DisplayName,
+              confirmationLink, ct);
+            if (changeMailResult.IsFailure)
+            {
+                return Result<Guid>.Failure(changeMailResult.Error);
+            }
             return Result.Success();
         }
     }

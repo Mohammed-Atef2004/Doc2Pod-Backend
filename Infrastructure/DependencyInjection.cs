@@ -52,6 +52,7 @@ public static class DependencyInjection
         services.Configure<ApiSettings>(configuration.GetSection(ApiSettings.SectionName));
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
+
         // 6. Register Repositories
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IDocumentRepository, DocumentRepository>();

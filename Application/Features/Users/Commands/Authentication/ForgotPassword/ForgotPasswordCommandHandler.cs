@@ -1,4 +1,5 @@
-﻿using Application.Features.Users.Services;
+﻿using Application.Features.Users.Commands.Authentication.VerifyTwoFactor;
+using Application.Features.Users.Services;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Domain.Settings;
@@ -8,6 +9,7 @@ using Domain.Users.Errors;
 using Domain.Users.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -60,9 +62,46 @@ namespace Application.Features.Users.Commands.Authentication.ForgotPassword
                 return Result.Success();
             }
 
-            var availabilityResult = user.CheckAvailability();
-            if (availabilityResult.IsFailure)
-                return availabilityResult;
+            if (!user.IsEmailConfirmed) 
+            {
+                var confirmToken = await _identityService.GenerateEmailConfirmationTokenAsync(user.Email.Value);
+                byte[] confirmTokenBytes = Encoding.UTF8.GetBytes(confirmToken);
+                string safeconfirmToken = WebEncoders.Base64UrlEncode(confirmTokenBytes);
+                var confirmationLink = $"{_apiSettings.BaseUrl}/api/authentication/confirm-email?" +
+                    $"userId={user.Id}&" +
+                    $"token={safeconfirmToken}";
+                var confirmResult =await _emailService.SendActivationReminderEmailAsync
+                    (user.Email.Value,
+                    user.FullName.DisplayName,
+                    confirmationLink);
+
+                string? reason;
+                if (confirmResult.IsFailure)
+                {
+                    reason = $"Email failed: {confirmResult.Error.Message}";
+                }
+                else
+                {
+                    reason = "User not confirmed; activation reminder sent.";
+                }
+
+                await _auditService.LogAsync(new AuditEntry(
+                ActorId: user.Id,
+                Action: AuditActions.UserForgotPassword,
+                EntityType: "User",
+                EntityId: user.Id,
+                IpAddress: _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                Succeeded: confirmResult.IsSuccess,
+                FailureReason: reason
+                ), ct);
+
+                return Result.Success();
+            }
+            if (user.IsDeleted)
+                return Result.Success();
+
+            if (!user.IsActive)
+                return Result.Success();
 
             var token = await _identityService.GeneratePasswordResetTokenAsync(user.Email.Value, ct);
 
@@ -80,9 +119,13 @@ namespace Application.Features.Users.Commands.Authentication.ForgotPassword
                 await _unitOfWork.CompleteAsync(ct);
                 return Result.Success();
             }
-            var resetLink = $"{_apiSettings.BaseUrl}/api/auth/reset-password?" +
+
+            byte[] tokenBytes = Encoding.UTF8.GetBytes(token);
+            string safeToken = WebEncoders.Base64UrlEncode(tokenBytes);
+            var resetLink = $"{_apiSettings.BaseUrl}/api/authentication/reset-password?" +
                 $"userId={user.Id}&" +
-                $"token={WebUtility.UrlEncode(token)}";
+                $"token={safeToken}";
+
             var emailTask = await _emailService.SendPasswordResetEmailAsync(
                 user.Email.Value,
                 user.FullName.DisplayName,

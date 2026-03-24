@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Features.Users.Commands.Authentication.VerifyTwoFactor
+namespace Application.Features.Users.Commands.Security.Confirm2FASetup
 {
-    public sealed class VerifyTwoFactorCommandValidator : AbstractValidator<VerifyTwoFactorCommand>
+    public sealed class Confirm2FASetupValidator : AbstractValidator<Confirm2FASetupCommand>
     {
-        public VerifyTwoFactorCommandValidator()
+        public Confirm2FASetupValidator()
         {
             RuleFor(x => x.UserId)
                 .NotEmpty().WithMessage("User ID is required.");
@@ -19,8 +19,8 @@ namespace Application.Features.Users.Commands.Authentication.VerifyTwoFactor
                 .Length(6).WithMessage("OTP code must be exactly 6 digits.")
                 .Matches(@"^[0-9]*$").WithMessage("OTP code must contain only numbers.");
 
-            RuleFor(x => x.IpAddress)
-                .MaximumLength(50).When(x => !string.IsNullOrEmpty(x.IpAddress));
+            RuleFor(x => x.NewSecret)
+                .NotEmpty().WithMessage("The security secret is required to complete setup.");
         }
     }
 }

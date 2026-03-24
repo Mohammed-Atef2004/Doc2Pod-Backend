@@ -6,6 +6,8 @@ using Application.Features.Users.Commands.Authentication.Logout;
 using Application.Features.Users.Commands.Authentication.Register;
 using Application.Features.Users.Commands.Authentication.ResetPassword;
 using Application.Features.Users.Commands.Authentication.VerifyTwoFactor;
+using Application.Features.Users.Commands.Authentication.VerifyTwoFactorLogin;
+using Domain.Users.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -36,7 +38,9 @@ namespace API.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterUserCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
-            return Ok(result);
+            if(result.IsSuccess)
+                return Ok(result);
+            return BadRequest(result.Error);
         }
 
 
@@ -45,7 +49,23 @@ namespace API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
+            if (result.IsFailure)
+            {
+                return BadRequest(result.Error);
+            }
             return Ok(result);
+        }
+
+        [HttpPost("verify-2fa-login")]
+        [AllowAnonymous] 
+        public async Task<IActionResult> VerifyTwoFactorLogin([FromBody] VerifyTwoFactorLoginCommand command, CancellationToken ct)
+        {
+            var result = await _mediator.Send(command, ct);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
         }
 
 
@@ -67,45 +87,63 @@ namespace API.Controllers
 
             var command = new ConfirmEmailCommand(userId, originalToken);
             var result = await _mediator.Send(command, ct);
-
-            return result.IsSuccess
-                ? Ok("Email confirmed successfully! You can now login.")
-                : BadRequest(result.Error);
+            if (result.IsSuccess)
+            {
+                return Ok("Email confirmed successfully! You can now login.");
+            }
+            return BadRequest(result);
         }
 
-        [HttpPost("confirm-email-change")]
-        [Authorize]
-        public async Task<IActionResult> ConfirmEmailChange([FromBody] ConfirmEmailChangeCommand command, CancellationToken cancellationToken)
+        [HttpGet("confirm-email-change")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmailChange([FromQuery] Guid userId, [FromQuery] string newEmail, [FromQuery] string token, CancellationToken ct)
         {
-            var result = await _mediator.Send(command, cancellationToken);
-            return Ok(result);
+            byte[] decodedBytes = WebEncoders.Base64UrlDecode(token);
+            string originalToken = Encoding.UTF8.GetString(decodedBytes);
+
+            var result = await _mediator.Send(new ConfirmEmailChangeCommand(userId, newEmail, originalToken), ct);
+
+            if (result.IsSuccess)
+            {
+                return Ok("Your email has been updated successfully.");
+            }
+            else
+            {
+                return BadRequest(result.Error);
+            }
         }
 
 
         [HttpPost("forgot-password")]
         [AllowAnonymous]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command, CancellationToken ct)
         {
-            var result = await _mediator.Send(command, cancellationToken);
-            return Ok(result);
+            var result = await _mediator.Send(command, ct);
+
+            if (result.IsSuccess)
+            {
+                return Ok("If your email exists, a reset link has been sent.");
+            }
+            else
+            {
+                return BadRequest(result.Error);
+            }
         }
 
 
         [HttpPost("reset-password")]
         [AllowAnonymous]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command, CancellationToken ct)
         {
-            var result = await _mediator.Send(command, cancellationToken);
-            return Ok(result);
+            byte[] decodedBytes = WebEncoders.Base64UrlDecode(command.Token);
+            string originalToken = Encoding.UTF8.GetString(decodedBytes);
+            var updatedCommand = command with { Token = originalToken };
+            var result = await _mediator.Send(updatedCommand, ct);
+            if (result.IsSuccess)
+                return Ok("Password Reset Success");
+            return BadRequest(result);
         }
 
-        [HttpPost("verify-two-factor")]
-        [AllowAnonymous]
-        public async Task<IActionResult> VerifyTwoFactor([FromBody] VerifyTwoFactorCommand command, CancellationToken cancellationToken)
-        {
-            var result = await _mediator.Send(command, cancellationToken);
-            return Ok(result);
-        }
 
     }
 }

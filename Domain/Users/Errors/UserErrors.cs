@@ -50,6 +50,7 @@ public static class UserErrors
 
 
 
+
     public static class SecurityErrors
     {
         public static readonly Error AccountLocked =
@@ -68,10 +69,12 @@ public static class UserErrors
         public static readonly Error PasswordAlreadyUsed =
             new("User.Security.PasswordAlreadyUsed",
                 "This password was used recently. Please choose a different password.");
-        public static readonly Error InvalidEmailToken
-            = new("User.Security.InvalidEmailToken", "The provided email token is invalid or expired.");
-        public static readonly Error InvalidTotpCode
-            = new("User.Security.InvalidTotpCode", "The provided TotpCode is Invalid");
+        public static readonly Error InvalidEmailToken=
+            new("User.Security.InvalidEmailToken", "The provided email token is invalid or expired.");
+        public static readonly Error InvalidTotpCode =
+            new("User.Security.InvalidTotpCode", "The provided TotpCode is Invalid");
+        public static readonly Error TokenGenerationFailed =
+            new("User.Security.TokenGenerationFailed", "An error occurred while generating the security token. Please try again.");
     }
 
 }

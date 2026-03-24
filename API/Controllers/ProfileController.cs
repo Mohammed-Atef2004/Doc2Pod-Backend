@@ -10,7 +10,7 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[AllowAnonymous]
 public class ProfileController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -28,14 +28,21 @@ public class ProfileController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPut("change-email")]
-    public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailCommand command, CancellationToken cancellationToken)
+    [HttpPost("change-email")]
+    public async Task<IActionResult> ChangeEmailRequest([FromBody] ChangeEmailCommand command, CancellationToken ct)
     {
-        var result = await _mediator.Send(command, cancellationToken);
-        return Ok(result);
+        var result = await _mediator.Send(command, ct);
+        if (result.IsSuccess)
+        {
+            return Ok("A confirmation link has been sent to your new email.");
+        }
+        else
+        {
+            return BadRequest(result);
+        }
     }
 
-  
+
     [HttpPut("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command, CancellationToken cancellationToken)
     {

@@ -2,12 +2,15 @@
 using Application.Features.Users.Services;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
+using Domain.Settings;
 using Domain.SharedKernel;
 using Domain.Users;
 using Domain.Users.Errors;
 using Domain.Users.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,16 +28,20 @@ namespace Application.Features.Users.Commands.Authentication.Login
         private readonly ITotpService _totpService;
         private readonly IAuditService _auditService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IEmailService _emailService;
+        private readonly ApiSettings _apiSettings;
 
 
         public LoginCommandHandler(
-            IUserRepository userRepository,
-            IUnitOfWork unitOfWork,
-            IIdentityService identityService,
-            ITokenService tokenService,
-            ITotpService totpService,
-            IHttpContextAccessor httpContextAccessor,
-            IAuditService auditService)
+          IUserRepository userRepository,
+          IUnitOfWork unitOfWork,
+          IIdentityService identityService,
+          ITokenService tokenService,
+          ITotpService totpService,
+          IEmailService emailService,
+          IOptions<ApiSettings> apiOptions,
+          IHttpContextAccessor httpContextAccessor,
+          IAuditService auditService)
         {
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
@@ -42,6 +49,8 @@ namespace Application.Features.Users.Commands.Authentication.Login
             _tokenService = tokenService;
             _totpService = totpService;
             _auditService = auditService;
+            _emailService = emailService;
+            _apiSettings = apiOptions.Value;
             _httpContextAccessor = httpContextAccessor;
 
         }
@@ -62,8 +71,20 @@ namespace Application.Features.Users.Commands.Authentication.Login
             if (availabilityResult.IsFailure)
                 return Result<LoginResponse>.Failure(availabilityResult.Error);
 
-            if (!user.IsEmailConfirmed)
+            if (!user.IsEmailConfirmed) 
+            {
+                var confirmToken = await _identityService.GenerateEmailConfirmationTokenAsync(user.Email.Value);
+                byte[] confirmTokenBytes = Encoding.UTF8.GetBytes(confirmToken);
+                string safeconfirmToken = WebEncoders.Base64UrlEncode(confirmTokenBytes);
+                var confirmationLink = $"{_apiSettings.BaseUrl}/api/authentication/confirm-email?" +
+                    $"userId={user.Id}&" +
+                    $"token={safeconfirmToken}";
+                var confirmResult = await _emailService.SendActivationReminderEmailAsync
+                    (user.Email.Value,
+                    user.FullName.DisplayName,
+                    confirmationLink);
                 return Result<LoginResponse>.Failure(UserErrors.EmailNotConfirmed);
+            }
 
             var passwordValid = await _identityService.CheckPasswordAsync(command.Email, command.Password, ct);
 
@@ -73,13 +94,13 @@ namespace Application.Features.Users.Commands.Authentication.Login
                 _userRepository.Update(user);
                 await _unitOfWork.CompleteAsync(ct);
                 await _auditService.LogAsync(new AuditEntry(
-                    ActorId: user.Id,
-                    Action: AuditActions.UserLoginFailed,
-                    EntityType: nameof(User),
-                    EntityId: user.Id,
-                    IpAddress: ipAddress,
-                    Succeeded: false,
-                    FailureReason: "Invalid password attempt."), ct);
+                  ActorId: user.Id,
+                  Action: AuditActions.UserLoginFailed,
+                  EntityType: nameof(User),
+                  EntityId: user.Id,
+                  IpAddress: ipAddress,
+                  Succeeded: false,
+                  FailureReason: "Invalid password attempt."), ct);
 
                 return Result<LoginResponse>.Failure(UserErrors.InvalidCredentials);
             }
@@ -90,50 +111,30 @@ namespace Application.Features.Users.Commands.Authentication.Login
 
             if (user.IsTwoFactorEnabled)
             {
-                string? qrCodeUri = null;
-                string? tempSecret = null;
-
-                if (user.RequiresTwoFactorReset)
-                {
-                    tempSecret = _totpService.GenerateSecret(); 
-                    qrCodeUri = _totpService.GenerateQrCodeUri(user.Email.Value, tempSecret);
-                }
-
                 return Result<LoginResponse>.Success(new LoginResponse(
-                    Token: null,
-                    UserId: user.Id,
-                    Username: user.Username.Value,
-                    Email: user.Email.Value,
-                    Role: user.Role.ToString(),
-                    RequiresTwoFactor: true,
-                    RequiresTwoFactorReset: user.RequiresTwoFactorReset,
-                    QrCodeUri: qrCodeUri,          
-                    NewTemporarySecret: tempSecret 
+                  Token: null,
+                  UserId: user.Id,
+                  RequiresTwoFactor: true
                 ));
             }
-
             await _auditService.LogAsync(new AuditEntry(
-                ActorId: user.Id,
-                Action: AuditActions.UserLogin,
-                EntityType: nameof(User),
-                EntityId: user.Id,
-                IpAddress: ipAddress,
-                Succeeded: true), ct);
+              ActorId: user.Id,
+              Action: AuditActions.UserLogin,
+              EntityType: nameof(User),
+              EntityId: user.Id,
+              IpAddress: ipAddress,
+              Succeeded: true), ct);
 
             var claims = new TokenClaims(
-                UserId: user.Id,
-                Email: user.Email.Value,
-                Username: user.Username.Value,
-                Role: user.Role.ToString());
+              UserId: user.Id,
+              Email: user.Email.Value,
+              Username: user.Username.Value,
+              Role: user.Role.ToString());
 
             return Result<LoginResponse>.Success(new LoginResponse(
-                Token: _tokenService.GenerateAccessToken(claims),
-                UserId: user.Id,
-                Username: user.Username.Value,
-                Email: user.Email.Value,
-                Role: user.Role.ToString(),
-                RequiresTwoFactor: false));
+              Token: _tokenService.GenerateAccessToken(claims),
+              UserId: user.Id,
+              RequiresTwoFactor: false));
         }
     }
-
 }
