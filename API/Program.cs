@@ -136,6 +136,17 @@ namespace API
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
                 };
             });
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngular",
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost:4200") 
+                              .AllowAnyHeader()
+                              .AllowAnyMethod()
+                              .AllowCredentials(); 
+                    });
+            });
 
             builder.Services.AddAuthorization();
 
@@ -154,7 +165,8 @@ namespace API
             }
 
             app.UseHttpsRedirection();
-
+            app.UseCors("AllowAngular"); // انزل بالسطر ده هنا
+            app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
 

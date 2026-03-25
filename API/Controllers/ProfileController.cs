@@ -91,7 +91,7 @@ public class ProfileController : ControllerBase
 
         return Ok(result);
     }
-    [HttpGet("user-profile")]
+    [HttpGet]
     public async Task<IActionResult> GetProfileData(CancellationToken ct)
     {
         var query = new GetUserByIdQuery(CurrentUserId);

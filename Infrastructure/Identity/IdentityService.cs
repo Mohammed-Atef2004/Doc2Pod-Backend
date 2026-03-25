@@ -58,6 +58,7 @@ public sealed class IdentityService : IIdentityService
     // =====================
     public async Task<Result> AssignRoleAsync(string identityId, UserRole role, CancellationToken ct = default)
     {
+       
         var user = await _userManager.FindByIdAsync(identityId);
         if (user is null) return Result.Failure(UserErrors.NotFound);
 
