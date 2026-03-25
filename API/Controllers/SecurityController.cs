@@ -19,14 +19,15 @@ public sealed class SecurityController : ControllerBase
     public SecurityController(ISender sender) => _sender = sender;
 
     private Guid CurrentUserId =>
-        Guid.Parse(User.FindFirstValue("sub") ?? throw new UnauthorizedAccessException());
+     Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) 
+     ?? throw new UnauthorizedAccessException("User ID not found in claims"));
 
     [HttpGet("setup-2fa")]
     public async Task<IActionResult> SetupTwoFactor(CancellationToken ct)
     {
         var result = await _sender.Send(new Setup2FACommand(CurrentUserId), ct);
         if (result.IsSuccess)
-            return Ok("2FA setup initiated successfully. Scan the QR code.");
+            return Ok(result);
         return BadRequest(result.Error);
     }
     [HttpPost("confirm-2fa-setup")]

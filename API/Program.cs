@@ -95,6 +95,7 @@ namespace API
             // ==========================
             // 3. Identity Setup
             // ==========================
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.Password.RequireDigit = true;

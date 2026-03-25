@@ -73,8 +73,7 @@ namespace Application.Features.Users.Commands.Authentication.Login
 
             if (!user.IsEmailConfirmed) 
             {
-                var confirmToken = await _identityService.GenerateEmailConfirmationTokenAsync(user.Email.Value);
-                byte[] confirmTokenBytes = Encoding.UTF8.GetBytes(confirmToken);
+                var confirmToken = await _identityService.GenerateEmailConfirmationTokenAsync(user.IdentityId); byte[] confirmTokenBytes = Encoding.UTF8.GetBytes(confirmToken);
                 string safeconfirmToken = WebEncoders.Base64UrlEncode(confirmTokenBytes);
                 var confirmationLink = $"{_apiSettings.BaseUrl}/api/authentication/confirm-email?" +
                     $"userId={user.Id}&" +

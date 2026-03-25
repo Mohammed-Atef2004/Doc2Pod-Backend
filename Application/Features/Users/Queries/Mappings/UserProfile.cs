@@ -16,13 +16,13 @@ namespace Application.Features.Users.Queries.Mappings
         public UserMappingProfile()
         {
             CreateMap<User, GetUserByIdResponse>()
-                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username.Value))
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()))
-                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive))
-                .ForMember(dest => dest.IsEmailConfirmed, opt => opt.MapFrom(src => src.IsEmailConfirmed))
-                .ForMember(dest => dest.LastLogin, opt => opt.MapFrom(src => src.LastLoginAt));
+     .ForCtorParam("Id", opt => opt.MapFrom(src => src.Id))
+     .ForCtorParam("Username", opt => opt.MapFrom(src => src.Username.Value))
+     .ForCtorParam("Email", opt => opt.MapFrom(src => src.Email.Value))
+     .ForCtorParam("Role", opt => opt.MapFrom(src => src.Role.ToString()))
+     .ForCtorParam("IsActive", opt => opt.MapFrom(src => src.IsActive))
+     .ForCtorParam("IsEmailConfirmed", opt => opt.MapFrom(src => src.IsEmailConfirmed))
+     .ForCtorParam("LastLogin", opt => opt.MapFrom(src => src.LastLoginAt));
 
             CreateMap<User, GetUserByEmailResponse>()
                  .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))

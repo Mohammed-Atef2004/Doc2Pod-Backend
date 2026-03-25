@@ -10,7 +10,7 @@ namespace Domain.Interfaces.Services
         // =====================
         // User Management
         // =====================
-        Task<Result<string>> CreateUserAsync(string email, string password, CancellationToken ct = default);
+        Task<Result<string>> CreateUserAsync(string email,string userName, string password, CancellationToken ct = default);
         Task<Result> DeleteUserAsync(string identityId, CancellationToken ct = default);
 
         // =====================

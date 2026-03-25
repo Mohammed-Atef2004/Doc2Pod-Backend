@@ -8,7 +8,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.ToTable("DomainUsers"); // ✅ تغيير الاسم لتجنب التعارض مع Identity
+        builder.ToTable("DomainUsers"); 
 
         builder.HasKey(u => u.Id);
 

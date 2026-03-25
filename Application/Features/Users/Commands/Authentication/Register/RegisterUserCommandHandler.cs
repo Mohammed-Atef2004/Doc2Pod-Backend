@@ -59,7 +59,7 @@ namespace Application.Auth.Commands.Register
             var isEmailTaken = await _userRepository.ExistsByEmailAsync(emailResult.Value, ct);
             var isUsernameTaken = await _userRepository.ExistsByUsernameAsync(usernameResult.Value, ct);
 
-            var identityResult = await _identity.CreateUserAsync(command.Email, command.Password, ct);
+            var identityResult = await _identity.CreateUserAsync(command.Email,command.Username, command.Password, ct);
             if (identityResult.IsFailure)
             {
                 return Result<Guid>.Failure(identityResult.Error);

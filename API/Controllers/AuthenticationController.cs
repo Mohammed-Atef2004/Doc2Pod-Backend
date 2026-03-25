@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using System.Security.Claims;
 using System.Text;
 
 namespace API.Controllers
@@ -22,7 +23,9 @@ namespace API.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly IMediator _mediator;
-
+        private Guid CurrentUserId =>
+           Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
+           ?? throw new UnauthorizedAccessException("User ID not found in claims"));
         public AuthenticationController(IMediator mediator)
         {
             _mediator = mediator;
@@ -58,9 +61,10 @@ namespace API.Controllers
 
         [HttpPost("verify-2fa-login")]
         [AllowAnonymous] 
-        public async Task<IActionResult> VerifyTwoFactorLogin([FromBody] VerifyTwoFactorLoginCommand command, CancellationToken ct)
+        public async Task<IActionResult> VerifyTwoFactorLogin(string totPCode, CancellationToken ct)
         {
-            var result = await _mediator.Send(command, ct);
+
+            var result = await _mediator.Send(new VerifyTwoFactorLoginCommand(CurrentUserId,totPCode), ct);
             if (result.IsSuccess)
             {
                 return Ok(result);

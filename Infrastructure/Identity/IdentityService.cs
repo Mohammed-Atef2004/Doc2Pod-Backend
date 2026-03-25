@@ -22,16 +22,17 @@ public sealed class IdentityService : IIdentityService
     // =====================
     // User Management
     // =====================
-    public async Task<Result<string>> CreateUserAsync(string email, string password, CancellationToken ct = default)
+    public async Task<Result<string>> CreateUserAsync(string email,string userName, string password, CancellationToken ct = default)
     {
         var normalizedEmail = email.ToLowerInvariant();
         var user = new ApplicationUser
         {
-            UserName = normalizedEmail,
+            UserName = userName,
             Email = normalizedEmail
         };
 
         var result = await _userManager.CreateAsync(user, password);
+       
 
         if (!result.Succeeded)
             return Result<string>.Failure(MapIdentityErrors(result.Errors));

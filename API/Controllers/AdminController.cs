@@ -13,7 +13,7 @@ namespace EducationalPlatform.Presentation.Controllers;
 
 [ApiController]
 [Route("api/admin/users")]
-[Authorize(Roles = "Admin,SuperAdmin")]
+//[Authorize(Roles = "Admin,SuperAdmin")]
 public sealed class AdminController : ControllerBase
 {
     private readonly ISender _sender;
