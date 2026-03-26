@@ -1,6 +1,8 @@
-﻿
-using Domain.Interfaces.Services;
+﻿using Domain.Interfaces.Services;
+using Domain.Users;
+using Infrastructure.Identity;
 using Infrastructure.Presistence.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -25,11 +27,13 @@ public sealed class TokenService : ITokenService
 {
     private readonly JwtOptions _options;
     private readonly AppDbContext _db;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public TokenService(IOptions<JwtOptions> options, AppDbContext db)
+    public TokenService(IOptions<JwtOptions> options, AppDbContext db, UserManager<ApplicationUser> userManager)
     {
         _options = options.Value;
         _db = db;
+        _userManager = userManager;
     }
 
     public string GenerateAccessToken(TokenClaims claims)
@@ -39,7 +43,10 @@ public sealed class TokenService : ITokenService
 
         var jwtClaims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub,   claims.UserId.ToString()),
+            // sub => IdentityId (string) — بيتستخدم في Logout و Token ops
+            new Claim(JwtRegisteredClaimNames.Sub,   claims.UserId),
+            // domain_user_id => DomainUserId (Guid) — بيتستخدم في Controllers
+            new Claim("domain_user_id",              claims.DomainUserId.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, claims.Email),
             new Claim(JwtRegisteredClaimNames.Jti,   Guid.NewGuid().ToString()),
             new Claim("username",                    claims.Username),
@@ -56,76 +63,81 @@ public sealed class TokenService : ITokenService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    //public async Task<string> GenerateRefreshTokenAsync(Guid userId, CancellationToken ct = default)
-    //{
-    //    var tokenValue = GenerateSecureToken();
-    //    var refreshToken = RefreshToken.Create(userId, tokenValue);
+    public string GenerateRefreshToken()
+    {
+        return GenerateSecureToken();
+    }
 
-    //    await _db.RefreshTokens.AddAsync(refreshToken, ct);
-    //    await _db.SaveChangesAsync(ct);
+    public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+    {
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = false,
+            ValidateIssuer = false,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey)),
+            ValidateLifetime = false
+        };
 
-    //    return tokenValue;
-    //}
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
 
-    //public async Task<TokenPair?> RotateRefreshTokenAsync(string refreshToken, CancellationToken ct = default)
-    //{
-    //    var stored = await _db.RefreshTokens
-    //        .FirstOrDefaultAsync(r => r.Token == refreshToken, ct);
+        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            throw new SecurityTokenException("Invalid token");
 
-    //    if (stored is null || stored.IsExpired) return null;
+        return principal;
+    }
 
-    //    // Reuse detection
-    //    if (stored.IsRevoked)
-    //    {
-    //        await RevokeAllRefreshTokensAsync(stored.UserId, ct);
-    //        return null;
-    //    }
+    public async Task<TokenPair?> RotateRefreshTokenAsync(string refreshTokenValue, CancellationToken ct = default)
+    {
+        var user = await _userManager.Users
+            .FirstOrDefaultAsync(u => u.RefreshToken == refreshTokenValue, ct);
 
-    //    var newTokenValue = GenerateSecureToken();
-    //    var newRefreshToken = RefreshToken.Create(stored.UserId, newTokenValue);
+        if (user is null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            return null;
 
-    //    stored.Revoke(newTokenValue);
-    //    await _db.RefreshTokens.AddAsync(newRefreshToken, ct);
-    //    await _db.SaveChangesAsync(ct);
+        var newTokenValue = GenerateSecureToken();
 
-    //    var user = await _db.Users.FindAsync(new object[] { stored.UserId }, ct);
-    //    if (user is null) return null;
+        // جيب الـ Role الحقيقي من الداتابيز بدل الـ hardcoded "User"
+        var roles = await _userManager.GetRolesAsync(user);
+        var role = roles.FirstOrDefault() ?? "User";
 
-    //    var claims = new TokenClaims(
-    //        UserId: user.Id,
-    //        Email: user.Email.Value,
-    //        Username: user.Username.Value,
-    //        Role: user.Role.ToString());
+        var claims = new TokenClaims(
+            UserId: user.Id,                  // IdentityId (string) — في الـ sub
+            DomainUserId: user.DomainUserId,  // Guid — في domain_user_id
+            Email: user.Email!,
+            Username: user.UserName!,
+            Role: role);
 
-    //    return new TokenPair(
-    //        AccessToken: GenerateAccessToken(claims),
-    //        RefreshToken: newTokenValue,
-    //        AccessTokenExpiresAt: DateTime.UtcNow.AddMinutes(_options.AccessTokenMinutes),
-    //        RefreshTokenExpiresAt: newRefreshToken.ExpiresAt);
-    //}
+        user.RefreshToken = newTokenValue;
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_options.RefreshTokenDays);
 
-    //public async Task RevokeRefreshTokenAsync(string refreshToken, CancellationToken ct = default)
-    //{
-    //    var stored = await _db.RefreshTokens
-    //        .FirstOrDefaultAsync(r => r.Token == refreshToken, ct);
+        await _userManager.UpdateAsync(user);
 
-    //    if (stored is null || stored.IsRevoked) return;
+        return new TokenPair(
+            AccessToken: GenerateAccessToken(claims),
+            RefreshToken: newTokenValue,
+            AccessTokenExpiresAt: DateTime.UtcNow.AddMinutes(_options.AccessTokenMinutes),
+            RefreshTokenExpiresAt: user.RefreshTokenExpiryTime);
+    }
 
-    //    stored.Revoke();
-    //    await _db.SaveChangesAsync(ct);
-    //}
+    public async Task RevokeRefreshTokenAsync(string userId, CancellationToken ct = default)
+    {
+        var identityUser = await _userManager.FindByIdAsync(userId);
 
-    //public async Task RevokeAllRefreshTokensAsync(Guid userId, CancellationToken ct = default)
-    //{
-    //    var tokens = await _db.RefreshTokens
-    //        .Where(r => r.UserId == userId && !r.IsRevoked)
-    //        .ToListAsync(ct);
+        if (identityUser is null) return;
 
-    //    foreach (var token in tokens)
-    //        token.Revoke();
+        identityUser.RefreshToken = null;
+        identityUser.RefreshTokenExpiryTime = null;
 
-    //    await _db.SaveChangesAsync(ct);
-    //}
+        var result = await _userManager.UpdateAsync(identityUser);
+
+        if (!result.Succeeded)
+        {
+            throw new Exception("Failed to revoke refresh token.");
+        }
+    }
 
     private static string GenerateSecureToken()
         => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));

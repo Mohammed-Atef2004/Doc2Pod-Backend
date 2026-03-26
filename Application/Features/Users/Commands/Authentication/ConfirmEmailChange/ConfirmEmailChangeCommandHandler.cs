@@ -74,7 +74,8 @@ namespace Application.Features.Users.Commands.Authentication.ConfirmEmailChange
                 Succeeded: true),ct);
 
             var claims = new TokenClaims(
-            UserId: user.Id,
+            DomainUserId: user.Id,
+            UserId: user.IdentityId,
             Email: user.Email.Value,
             Username: user.Username.Value,
             Role: user.Role.ToString());

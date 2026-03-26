@@ -22,8 +22,10 @@ public class ProfileController : ControllerBase
         _mediator = mediator;
     }
 
+    // بنقرأ من "domain_user_id" اللي حطيناه في التوكن بدل sub
+    // لأن sub فيه IdentityId (string) مش الـ Domain Guid
     private Guid CurrentUserId =>
-        Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
+        Guid.Parse(User.FindFirstValue("domain_user_id")
         ?? throw new UnauthorizedAccessException("User ID not found in claims"));
 
     [HttpPut("change-name")]
@@ -37,7 +39,6 @@ public class ProfileController : ControllerBase
             request.LastName);
 
         var result = await _mediator.Send(command, cancellationToken);
-
         return Ok(result);
     }
 
@@ -72,7 +73,6 @@ public class ProfileController : ControllerBase
             request.TwoFactorCode);
 
         var result = await _mediator.Send(command, cancellationToken);
-
         return Ok(result);
     }
 
@@ -88,35 +88,33 @@ public class ProfileController : ControllerBase
             request.TwoFactorCode);
 
         var result = await _mediator.Send(command, cancellationToken);
-
         return Ok(result);
     }
+
     [HttpGet]
     public async Task<IActionResult> GetProfileData(CancellationToken ct)
     {
         var query = new GetUserByIdQuery(CurrentUserId);
-
         var result = await _mediator.Send(query, ct);
-
         return Ok(result);
     }
 }
+
 public sealed record ChangeNameRequest(
     string FirstName,
-    string LastName
-);
+    string LastName);
+
 public sealed record ChangeEmailRequest(
     string NewEmail,
     string CurrentPassword,
-    string? TwoFactorCode
-);
+    string? TwoFactorCode);
+
 public sealed record ChangePasswordRequest(
     string CurrentPassword,
     string NewPassword,
-    string? TwoFactorCode
-);
+    string? TwoFactorCode);
+
 public sealed record SetPhoneNumberRequest(
     string NewPhoneNumber,
     string CurrentPassword,
-    string? TwoFactorCode
-);
+    string? TwoFactorCode);

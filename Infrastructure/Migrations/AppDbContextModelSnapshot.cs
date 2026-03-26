@@ -148,7 +148,8 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("IdentityId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("IdentityId");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -196,6 +197,9 @@ namespace Infrastructure.Migrations
                         .HasColumnName("Username");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IdentityId")
+                        .IsUnique();
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -247,6 +251,12 @@ namespace Infrastructure.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");

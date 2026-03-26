@@ -8,5 +8,5 @@ using System.Threading.Tasks;
 
 namespace Application.Features.Users.Commands.Authentication.Logout
 {
-    public sealed record LogoutCommand(Guid UserId) : IRequest<Result>;
+    public sealed record LogoutCommand() : IRequest<Result>;
 }

@@ -23,9 +23,13 @@ namespace API.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly IMediator _mediator;
+
+        // بنقرأ من "domain_user_id" اللي حطيناه في التوكن بدل sub
+        // لأن sub فيه IdentityId (string) مش الـ Domain Guid
         private Guid CurrentUserId =>
-           Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
-           ?? throw new UnauthorizedAccessException("User ID not found in claims"));
+            Guid.Parse(User.FindFirstValue("domain_user_id")
+            ?? throw new UnauthorizedAccessException("User ID not found in claims"));
+
         public AuthenticationController(IMediator mediator)
         {
             _mediator = mediator;
@@ -35,17 +39,15 @@ namespace API.Controllers
         // Authentication
         // ─────────────────────────────────────────────
 
-
         [HttpPost("register")]
         [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterUserCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
-            if(result.IsSuccess)
+            if (result.IsSuccess)
                 return Ok(result);
             return BadRequest(result.Error);
         }
-
 
         [HttpPost("login")]
         [AllowAnonymous]
@@ -53,35 +55,35 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(command, cancellationToken);
             if (result.IsFailure)
-            {
                 return BadRequest(result.Error);
-            }
             return Ok(result);
         }
 
+        // الـ endpoint ده AllowAnonymous لأن المستخدم لسه مش logged in
+        // فبنبعت الـ UserId في الـ Body مش من التوكن
         [HttpPost("verify-2fa-login")]
-        [AllowAnonymous] 
-        public async Task<IActionResult> VerifyTwoFactorLogin(string totPCode, CancellationToken ct)
+        [AllowAnonymous]
+        public async Task<IActionResult> VerifyTwoFactorLogin(
+            [FromBody] VerifyTwoFactorLoginRequest request,
+            CancellationToken ct)
         {
+            var result = await _mediator.Send(
+                new VerifyTwoFactorLoginCommand(request.UserId, request.TotpCode), ct);
 
-            var result = await _mediator.Send(new VerifyTwoFactorLoginCommand(CurrentUserId,totPCode), ct);
             if (result.IsSuccess)
-            {
                 return Ok(result);
-            }
+
             return BadRequest(result);
         }
 
-
         [HttpPost("logout")]
         [Authorize]
-        public async Task<IActionResult> Logout([FromBody] LogoutCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> Logout()
         {
-            var result = await _mediator.Send(command, cancellationToken);
-            return Ok(result);
+            var result = await _mediator.Send(new LogoutCommand());
+            return result.IsSuccess ? Ok() : BadRequest(result.Error);
         }
 
-        //API Design Issue 
         [HttpGet("confirm-email")]
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail([FromQuery] Guid userId, [FromQuery] string token, CancellationToken ct)
@@ -92,15 +94,18 @@ namespace API.Controllers
             var command = new ConfirmEmailCommand(userId, originalToken);
             var result = await _mediator.Send(command, ct);
             if (result.IsSuccess)
-            {
                 return Ok("Email confirmed successfully! You can now login.");
-            }
+
             return BadRequest(result);
         }
 
         [HttpGet("confirm-email-change")]
         [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmailChange([FromQuery] Guid userId, [FromQuery] string newEmail, [FromQuery] string token, CancellationToken ct)
+        public async Task<IActionResult> ConfirmEmailChange(
+            [FromQuery] Guid userId,
+            [FromQuery] string newEmail,
+            [FromQuery] string token,
+            CancellationToken ct)
         {
             byte[] decodedBytes = WebEncoders.Base64UrlDecode(token);
             string originalToken = Encoding.UTF8.GetString(decodedBytes);
@@ -108,15 +113,10 @@ namespace API.Controllers
             var result = await _mediator.Send(new ConfirmEmailChangeCommand(userId, newEmail, originalToken), ct);
 
             if (result.IsSuccess)
-            {
                 return Ok("Your email has been updated successfully.");
-            }
-            else
-            {
-                return BadRequest(result.Error);
-            }
-        }
 
+            return BadRequest(result.Error);
+        }
 
         [HttpPost("forgot-password")]
         [AllowAnonymous]
@@ -125,15 +125,10 @@ namespace API.Controllers
             var result = await _mediator.Send(command, ct);
 
             if (result.IsSuccess)
-            {
                 return Ok("If your email exists, a reset link has been sent.");
-            }
-            else
-            {
-                return BadRequest(result.Error);
-            }
-        }
 
+            return BadRequest(result.Error);
+        }
 
         [HttpPost("reset-password")]
         [AllowAnonymous]
@@ -147,7 +142,9 @@ namespace API.Controllers
                 return Ok("Password Reset Success");
             return BadRequest(result);
         }
-
-
     }
+
+    public sealed record VerifyTwoFactorLoginRequest(
+        Guid UserId,
+        string TotpCode);
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260324173201_a")]
-    partial class a
+    [Migration("20260326160916_addRefreshToken")]
+    partial class addRefreshToken
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -181,9 +181,6 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("RegisteredAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("RequiresTwoFactorReset")
-                        .HasColumnType("bit");
-
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
@@ -253,6 +250,12 @@ namespace Infrastructure.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("RefreshTokenExpiryTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");

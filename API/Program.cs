@@ -1,5 +1,6 @@
 ﻿using Application;
 using Application.Interfaces;
+using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using EducationalPlatform.Infrastructure.Services.Token;
 using Infrastructure.Identity;
@@ -11,7 +12,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -23,7 +23,9 @@ namespace API
     {
         public static void Main(string[] args)
         {
+            // مسح الـ Mapping الافتراضي للـ Claims عشان نستخدم الـ Standard JWT Names
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
             var builder = WebApplication.CreateBuilder(args);
             builder.Configuration.AddUserSecrets<Program>();
 
@@ -32,8 +34,6 @@ namespace API
             // ==========================
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-
-
 
             builder.Services.AddSwaggerGen(options =>
             {
@@ -54,19 +54,12 @@ namespace API
                     {
                         new OpenApiSecurityScheme
                         {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
                         },
                         Array.Empty<string>()
                     }
                 });
-                });
-
-
-
+            });
 
             builder.Services.AddLogging();
             builder.Services.AddHttpContextAccessor();
@@ -89,13 +82,14 @@ namespace API
 
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
+
+            // MediatR Setup
             builder.Services.AddMediatR(cfg =>
                 cfg.RegisterServicesFromAssembly(typeof(ApplicationAssemblyMarker).Assembly));
 
             // ==========================
             // 3. Identity Setup
             // ==========================
-            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.Password.RequireDigit = true;
@@ -109,11 +103,19 @@ namespace API
             .AddDefaultTokenProviders();
 
             builder.Services.AddScoped<IIdentityService, IdentityService>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
 
-            //// ==========================
-            //// 4. JWT Authentication
-            //// ==========================
+            // ==========================
+            // 4. Token Blacklist (MemoryCache)
+            // ==========================
+            // AddMemoryCache بيضيف الـ IMemoryCache في الـ DI
+            builder.Services.AddMemoryCache();
+            // Singleton لأن الـ Cache محتاج يكون shared بين كل الـ requests
+            builder.Services.AddSingleton<ITokenBlacklistService, TokenBlacklistService>();
 
+            // ==========================
+            // 5. JWT Authentication
+            // ==========================
             var jwtSection = builder.Configuration.GetSection("Jwt");
             builder.Services.Configure<JwtOptions>(jwtSection);
             var jwtOptions = jwtSection.Get<JwtOptions>();
@@ -133,19 +135,20 @@ namespace API
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtOptions.Issuer,
                     ValidAudience = jwtOptions.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
+                    ClockSkew = TimeSpan.Zero
                 };
             });
+
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAngular",
-                    policy =>
-                    {
-                        policy.WithOrigins("http://localhost:4200") 
-                              .AllowAnyHeader()
-                              .AllowAnyMethod()
-                              .AllowCredentials(); 
-                    });
+                options.AddPolicy("AllowAngular", policy =>
+                {
+                    policy.WithOrigins("http://localhost:4200")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
             });
 
             builder.Services.AddAuthorization();
@@ -153,7 +156,7 @@ namespace API
             var app = builder.Build();
 
             // ==========================
-            // 5. Middleware Pipeline
+            // 6. Middleware Pipeline
             // ==========================
             app.UseMiddleware<ExceptionHandlingMiddleware>();
 
@@ -165,9 +168,14 @@ namespace API
             }
 
             app.UseHttpsRedirection();
-            app.UseCors("AllowAngular"); // انزل بالسطر ده هنا
-            app.UseHttpsRedirection();
+
+            app.UseCors("AllowAngular");
+
             app.UseAuthentication();
+
+            // لازم يكون بعد UseAuthentication عشان الـ User Claims تكون متعبية
+            app.UseMiddleware<BlacklistMiddleware>();
+
             app.UseAuthorization();
 
             app.MapControllers();

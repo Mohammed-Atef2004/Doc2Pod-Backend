@@ -183,6 +183,21 @@ public sealed class IdentityService : IIdentityService
     }
 
     // =====================
+    // Refresh Token Management 
+    // =====================
+    public async Task UpdateRefreshTokenAsync(string identityId, string refreshToken, CancellationToken ct = default)
+    {
+        var user = await _userManager.FindByIdAsync(identityId);
+        if (user != null)
+        {
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+
+            await _userManager.UpdateAsync(user);
+            
+        }
+    }
+    // =====================
     // Private Helpers
     // =====================
     private static Error MapIdentityErrors(IEnumerable<IdentityError> errors)

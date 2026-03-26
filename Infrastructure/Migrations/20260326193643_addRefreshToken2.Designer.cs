@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260322181930_updateuserscheme")]
-    partial class updateuserscheme
+    [Migration("20260326193643_addRefreshToken2")]
+    partial class addRefreshToken2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,6 +71,10 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AudioPath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -177,9 +181,6 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("RegisteredAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("RequiresTwoFactorReset")
-                        .HasColumnType("bit");
-
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
@@ -202,7 +203,7 @@ namespace Infrastructure.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("DomainUsers", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUser", b =>
@@ -249,6 +250,12 @@ namespace Infrastructure.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -489,7 +496,7 @@ namespace Infrastructure.Migrations
 
                             b1.HasKey("UserId");
 
-                            b1.ToTable("Users");
+                            b1.ToTable("DomainUsers");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");

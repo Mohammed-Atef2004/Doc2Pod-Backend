@@ -39,5 +39,7 @@ namespace Domain.Interfaces.Services
         // =====================
         Task<string> GenerateChangeEmailTokenAsync(string identityId, string newEmail, CancellationToken ct = default);
         Task<Result> ConfirmEmailChangeAsync(string identityId, string newEmail, string token, CancellationToken ct = default);
+
+        Task UpdateRefreshTokenAsync(string identityId, string refreshToken, CancellationToken ct = default);
     }
 }

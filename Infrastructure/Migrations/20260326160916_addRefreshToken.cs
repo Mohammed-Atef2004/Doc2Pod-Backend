@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class addedusertable : Migration
+    public partial class addRefreshToken : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -31,6 +31,8 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     DomainUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -72,7 +74,27 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "Documents",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Documents", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DomainUsers",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -84,6 +106,7 @@ namespace Infrastructure.Migrations
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Role = table.Column<int>(type: "int", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsEmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     RegisteredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -102,7 +125,7 @@ namespace Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_DomainUsers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -211,6 +234,36 @@ namespace Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Podcast",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DocumentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Mode = table.Column<int>(type: "int", nullable: false),
+                    Topic = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StartPage = table.Column<int>(type: "int", nullable: true),
+                    EndPage = table.Column<int>(type: "int", nullable: true),
+                    ScriptPath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AudioPath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Podcast", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Podcast_Documents_DocumentId",
+                        column: x => x.DocumentId,
+                        principalTable: "Documents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -271,10 +324,15 @@ namespace Infrastructure.Migrations
                 column: "OccurredAt");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_Username",
-                table: "Users",
+                name: "IX_DomainUsers_Username",
+                table: "DomainUsers",
                 column: "Username",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Podcast_DocumentId",
+                table: "Podcast",
+                column: "DocumentId");
         }
 
         /// <inheritdoc />
@@ -299,13 +357,19 @@ namespace Infrastructure.Migrations
                 name: "AuditLogs");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "DomainUsers");
+
+            migrationBuilder.DropTable(
+                name: "Podcast");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Documents");
         }
     }
 }
