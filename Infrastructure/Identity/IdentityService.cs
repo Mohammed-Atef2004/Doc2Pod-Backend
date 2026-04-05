@@ -22,24 +22,38 @@ public sealed class IdentityService : IIdentityService
     // =====================
     // User Management
     // =====================
-    public async Task<Result<string>> CreateUserAsync(string email,string userName, string password, CancellationToken ct = default)
+    //public async Task<Result<string>> CreateUserAsync(string email,string userName, string password, CancellationToken ct = default)
+    //{
+    //    var normalizedEmail = email.ToLowerInvariant();
+    //    var user = new ApplicationUser
+    //    {
+    //        UserName = userName,
+    //        Email = normalizedEmail
+    //    };
+
+    //    var result = await _userManager.CreateAsync(user, password);
+
+
+    //    if (!result.Succeeded)
+    //        return Result<string>.Failure(MapIdentityErrors(result.Errors));
+
+    //    var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+    //    return Result<string>.Success(user.Id);
+    //}
+
+    // في IdentityService.cs
+    public async Task<Result<string>> CreateUserAsync(string email, string username, string password, Guid domainUserId, CancellationToken ct)
     {
-        var normalizedEmail = email.ToLowerInvariant();
         var user = new ApplicationUser
         {
-            UserName = userName,
-            Email = normalizedEmail
+            UserName = username,
+            Email = email,
+            DomainUserId = domainUserId // نربطه بالـ ID من أول ثانية
         };
 
         var result = await _userManager.CreateAsync(user, password);
-       
-
-        if (!result.Succeeded)
-            return Result<string>.Failure(MapIdentityErrors(result.Errors));
-
-        var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-        return Result<string>.Success(user.Id);
+        return result.Succeeded ? Result<string>.Success(user.Id) : Result<string>.Failure(MapIdentityErrors(result.Errors));
     }
 
     public async Task<Result> DeleteUserAsync(string identityId, CancellationToken ct = default)
@@ -58,7 +72,7 @@ public sealed class IdentityService : IIdentityService
     // =====================
     public async Task<Result> AssignRoleAsync(string identityId, UserRole role, CancellationToken ct = default)
     {
-       
+
         var user = await _userManager.FindByIdAsync(identityId);
         if (user is null) return Result.Failure(UserErrors.NotFound);
 
@@ -194,7 +208,7 @@ public sealed class IdentityService : IIdentityService
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
 
             await _userManager.UpdateAsync(user);
-            
+
         }
     }
     // =====================

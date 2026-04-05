@@ -1,7 +1,5 @@
 ﻿using Domain.SharedKernel;
 using Domain.Users;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Domain.Interfaces.Services
 {
@@ -10,7 +8,8 @@ namespace Domain.Interfaces.Services
         // =====================
         // User Management
         // =====================
-        Task<Result<string>> CreateUserAsync(string email,string userName, string password, CancellationToken ct = default);
+        //Task<Result<string>> CreateUserAsync(string email,string userName, string password, CancellationToken ct = default);
+        Task<Result<string>> CreateUserAsync(string email, string username, string password, Guid domainUserId, CancellationToken ct);
         Task<Result> DeleteUserAsync(string identityId, CancellationToken ct = default);
 
         // =====================

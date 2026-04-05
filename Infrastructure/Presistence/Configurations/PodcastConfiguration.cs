@@ -23,6 +23,12 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany(d => d.Podcasts)
                 .HasForeignKey(p => p.DocumentId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(p => p.User)
+                .WithMany(u => u.Podcasts)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }

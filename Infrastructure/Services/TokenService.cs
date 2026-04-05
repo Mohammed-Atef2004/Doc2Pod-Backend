@@ -1,5 +1,4 @@
 ﻿using Domain.Interfaces.Services;
-using Domain.Users;
 using Infrastructure.Identity;
 using Infrastructure.Presistence.Data;
 using Microsoft.AspNetCore.Identity;
@@ -57,7 +56,7 @@ public sealed class TokenService : ITokenService
             issuer: _options.Issuer,
             audience: _options.Audience,
             claims: jwtClaims,
-            expires: DateTime.UtcNow.AddMinutes(_options.AccessTokenMinutes),
+            expires: DateTime.UtcNow.AddDays(_options.AccessTokenMinutes),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

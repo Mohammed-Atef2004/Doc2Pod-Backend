@@ -5,8 +5,7 @@ using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using MediatR;
-using Microsoft.Extensions.DependencyInjection; 
-using System.Net.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Features.Podcasts.Commands.GeneratePodcast
 {
@@ -14,12 +13,12 @@ namespace Application.Features.Podcasts.Commands.GeneratePodcast
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPythonRagService _ragService;
-        private readonly IServiceScopeFactory _scopeFactory; 
+        private readonly IServiceScopeFactory _scopeFactory;
 
         public GeneratePodcastHandler(
             IPythonRagService ragService,
             IUnitOfWork unitOfWork,
-            IServiceScopeFactory scopeFactory) 
+            IServiceScopeFactory scopeFactory)
         {
             _ragService = ragService;
             _unitOfWork = unitOfWork;
@@ -28,7 +27,7 @@ namespace Application.Features.Podcasts.Commands.GeneratePodcast
 
         public async Task<Guid> Handle(GeneratePodcastCommand command, CancellationToken cancellationToken)
         {
-            
+
             var initialDocument = await _unitOfWork.Document.GetByIdAsync(command.DocumentId);
 
             if (initialDocument == null)
@@ -43,7 +42,7 @@ namespace Application.Features.Podcasts.Commands.GeneratePodcast
                 EndPage = command.EndPage
             };
 
-            
+
             var taskId = await _ragService.StartGenerationAsync(request);
             PodcastGenerationStatusResponse status = null;
 
@@ -88,7 +87,7 @@ namespace Application.Features.Podcasts.Commands.GeneratePodcast
             if (string.IsNullOrEmpty(status.ScriptPath))
                 throw new Exception("Script path is NULL");
 
-            
+
             using (var scope = _scopeFactory.CreateScope())
             {
                 var freshUnitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -98,6 +97,7 @@ namespace Application.Features.Podcasts.Commands.GeneratePodcast
                     throw new NotFoundException(nameof(Document), command.DocumentId);
 
                 var podcast = freshDocument.AddPodcast(
+                    command.UserId,
                     command.Mode,
                     command.Topic,
                     command.StartPage,

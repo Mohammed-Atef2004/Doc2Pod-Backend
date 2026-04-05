@@ -110,11 +110,16 @@ namespace Infrastructure.Migrations
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DocumentId");
 
-                    b.ToTable("Podcast");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Podcasts");
                 });
 
             modelBuilder.Entity("Domain.Users.User", b =>
@@ -473,7 +478,15 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Users.User", "User")
+                        .WithMany("Podcasts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Document");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Users.User", b =>
@@ -559,6 +572,11 @@ namespace Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Domain.Entities.Document", b =>
+                {
+                    b.Navigation("Podcasts");
+                });
+
+            modelBuilder.Entity("Domain.Users.User", b =>
                 {
                     b.Navigation("Podcasts");
                 });

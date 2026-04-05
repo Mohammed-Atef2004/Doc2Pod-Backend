@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class addRefreshToken : Migration
+    public partial class GetAllPodcasts : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -32,7 +32,7 @@ namespace Infrastructure.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     DomainUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -98,7 +98,7 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdentityId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IdentityId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
@@ -235,11 +235,12 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Podcast",
+                name: "Podcasts",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DocumentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Mode = table.Column<int>(type: "int", nullable: false),
                     Topic = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StartPage = table.Column<int>(type: "int", nullable: true),
@@ -255,13 +256,19 @@ namespace Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Podcast", x => x.Id);
+                    table.PrimaryKey("PK_Podcasts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Podcast_Documents_DocumentId",
+                        name: "FK_Podcasts_Documents_DocumentId",
                         column: x => x.DocumentId,
                         principalTable: "Documents",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Podcasts_DomainUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "DomainUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -324,15 +331,26 @@ namespace Infrastructure.Migrations
                 column: "OccurredAt");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DomainUsers_IdentityId",
+                table: "DomainUsers",
+                column: "IdentityId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DomainUsers_Username",
                 table: "DomainUsers",
                 column: "Username",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Podcast_DocumentId",
-                table: "Podcast",
+                name: "IX_Podcasts_DocumentId",
+                table: "Podcasts",
                 column: "DocumentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Podcasts_UserId",
+                table: "Podcasts",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -357,10 +375,7 @@ namespace Infrastructure.Migrations
                 name: "AuditLogs");
 
             migrationBuilder.DropTable(
-                name: "DomainUsers");
-
-            migrationBuilder.DropTable(
-                name: "Podcast");
+                name: "Podcasts");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -370,6 +385,9 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Documents");
+
+            migrationBuilder.DropTable(
+                name: "DomainUsers");
         }
     }
 }

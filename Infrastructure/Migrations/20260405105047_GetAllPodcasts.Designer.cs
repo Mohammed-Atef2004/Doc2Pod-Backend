@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260326193643_addRefreshToken2")]
-    partial class addRefreshToken2
+    [Migration("20260405105047_GetAllPodcasts")]
+    partial class GetAllPodcasts
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -113,11 +113,16 @@ namespace Infrastructure.Migrations
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DocumentId");
 
-                    b.ToTable("Podcast");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Podcasts");
                 });
 
             modelBuilder.Entity("Domain.Users.User", b =>
@@ -151,7 +156,8 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("IdentityId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("IdentityId");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -199,6 +205,9 @@ namespace Infrastructure.Migrations
                         .HasColumnName("Username");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IdentityId")
+                        .IsUnique();
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -472,7 +481,15 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Users.User", "User")
+                        .WithMany("Podcasts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Document");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Users.User", b =>
@@ -558,6 +575,11 @@ namespace Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Domain.Entities.Document", b =>
+                {
+                    b.Navigation("Podcasts");
+                });
+
+            modelBuilder.Entity("Domain.Users.User", b =>
                 {
                     b.Navigation("Podcasts");
                 });

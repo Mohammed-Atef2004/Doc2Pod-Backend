@@ -7,28 +7,25 @@ namespace Domain.Entities
     {
         public string FileName { get; private set; }
         public string FilePath { get; private set; }
-        public DateTime UploadedAt { get; private set; }
+
 
         private readonly List<Podcast> _podcasts = new List<Podcast>();
         public IReadOnlyCollection<Podcast> Podcasts => _podcasts.AsReadOnly();
 
         protected Document() { }
 
-        public Document(string fileName, string filePath)
+        public Document(string fileName, string filePath) : base(Guid.NewGuid())
         {
             FileName = fileName;
             FilePath = filePath;
-            UploadedAt = DateTime.UtcNow;
         }
 
-        public Podcast AddPodcast(PodcastMode mode, string? topic, int? startPage, int? endPage, string scriptPath, string audioPath)
+        public Podcast AddPodcast(Guid UserId, PodcastMode mode, string? topic, int? startPage, int? endPage, string scriptPath, string audioPath)
         {
-
-            if (_podcasts.Any(p => p.Mode == mode))
-                throw new Exception("Podcast already exists for this mode");
 
             var podcast = new Podcast(
                 Id,
+                UserId,
                 mode,
                 topic,
                 startPage,

@@ -1,7 +1,10 @@
 ﻿using Application.Features.Podcasts.Commands.GeneratePodcast;
+using Application.Features.Podcasts.Query.GetAllPodcasts;
 using Application.Features.Podcasts.Query.GetPodcast;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
@@ -18,22 +21,37 @@ namespace API.Controllers
 
 
         [HttpPost("generate")]
-        public async Task<IActionResult> Generate([FromBody] GeneratePodcastCommand command)
+        [Authorize]
+        public async Task<IActionResult> Generate(GeneratePodcastCommand command)
         {
-            try
+            var userIdString = User.FindFirstValue("domain_user_id");
+
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
             {
-                var result = await _mediator.Send(command);
-                return Ok(result);
+                return Unauthorized(new { message = "User ID not found in token" });
             }
-            catch (Exception ex)
+
+            var commandWithUser = command with { UserId = userId };
+            var result = await _mediator.Send(commandWithUser);
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllPodcasts(CancellationToken cancellationToken)
+        {
+            var userIdString = User.FindFirstValue("domain_user_id");
+
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
             {
-                return StatusCode(500, new
-                {
-                    message = "Error occurred while generating podcast",
-                    error = ex.Message,
-                    stackTrace = ex.StackTrace
-                });
+                return Unauthorized(new { message = "User identity not found in token." });
             }
+
+            var query = new GetAllPodcastsQuery(userId);
+            var result = await _mediator.Send(query, cancellationToken);
+
+            return Ok(result);
+
         }
 
         [HttpGet("{id}")]

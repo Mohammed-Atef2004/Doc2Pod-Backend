@@ -11,13 +11,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Users.Commands.Authentication.Login
 {
@@ -71,7 +65,7 @@ namespace Application.Features.Users.Commands.Authentication.Login
             if (availabilityResult.IsFailure)
                 return Result<LoginResponse>.Failure(availabilityResult.Error);
 
-            // التحقق من تأكيد الإيميل
+
             if (!user.IsEmailConfirmed)
             {
                 var confirmToken = await _identityService.GenerateEmailConfirmationTokenAsync(user.IdentityId);
@@ -114,7 +108,7 @@ namespace Application.Features.Users.Commands.Authentication.Login
             _userRepository.Update(user);
             await _unitOfWork.CompleteAsync(ct);
 
-            // التعامل مع الـ 2FA
+
             if (user.IsTwoFactorEnabled)
             {
                 return Result<LoginResponse>.Success(new LoginResponse(
@@ -125,10 +119,10 @@ namespace Application.Features.Users.Commands.Authentication.Login
                 ));
             }
 
-            
+
             var claims = new TokenClaims(
-                UserId: user.IdentityId,   // string — يروح في الـ sub claim
-                DomainUserId: user.Id,     // Guid  — يروح في الـ domain_user_id claim
+                UserId: user.IdentityId,
+                DomainUserId: user.Id,
                 Email: user.Email.Value,
                 Username: user.Username.Value,
                 Role: user.Role.ToString());

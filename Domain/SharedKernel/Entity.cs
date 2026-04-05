@@ -1,6 +1,6 @@
 ﻿namespace Domain.SharedKernel;
 
-public abstract class Entity<TId> : IEquatable<Entity<TId>>,IAudiatable,ISoftDeletable
+public abstract class Entity<TId> : IEquatable<Entity<TId>>, IAudiatable, ISoftDeletable
 {
     public TId Id { get; protected set; } = default!;
 
@@ -8,7 +8,7 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>,IAudiatable,ISoftDel
 
     public DateTime? DeletedAtUtc { get; private set; }
 
-    public DateTime CreatedAt { get;private set; }
+    public DateTime CreatedAt { get; private set; }
 
     public DateTime? UpdatedAt { get; private set; }
 
@@ -21,6 +21,7 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>,IAudiatable,ISoftDel
     protected Entity(TId id)
     {
         Id = id;
+        CreatedAt = DateTime.UtcNow;
     }
 
     public override bool Equals(object? obj)

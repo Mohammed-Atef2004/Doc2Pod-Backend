@@ -9,12 +9,9 @@ using Domain.Users;
 using Domain.Users.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
-using System.Net;
-using System.Text;
 
-namespace Application.Auth.Commands.Register 
+namespace Application.Auth.Commands.Register
 {
     public sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<Guid>>
     {
@@ -48,18 +45,27 @@ namespace Application.Auth.Commands.Register
         public async Task<Result<Guid>> Handle(RegisterUserCommand command, CancellationToken ct)
         {
             var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
             var emailResult = Email.Create(command.Email);
-            if (emailResult.IsFailure)
-                return Result<Guid>.Failure(emailResult.Error);
+            if (emailResult.IsFailure) return Result<Guid>.Failure(emailResult.Error);
 
             var usernameResult = Username.Create(command.Username);
-            if (usernameResult.IsFailure)
-                return Result<Guid>.Failure(usernameResult.Error);
+            if (usernameResult.IsFailure) return Result<Guid>.Failure(usernameResult.Error);
+
 
             var isEmailTaken = await _userRepository.ExistsByEmailAsync(emailResult.Value, ct);
             var isUsernameTaken = await _userRepository.ExistsByUsernameAsync(usernameResult.Value, ct);
 
-            var identityResult = await _identity.CreateUserAsync(command.Email,command.Username, command.Password, ct);
+
+            var newDomainUserId = Guid.NewGuid();
+
+            var identityResult = await _identity.CreateUserAsync(
+                command.Email,
+                command.Username,
+                command.Password,
+                newDomainUserId,
+                ct);
+
             if (identityResult.IsFailure)
             {
                 return Result<Guid>.Failure(identityResult.Error);
@@ -74,7 +80,7 @@ namespace Application.Auth.Commands.Register
                 command.FirstName,
                 command.LastName,
                 isEmailTaken,
-                isUsernameTaken, 
+                isUsernameTaken,
                 UserRole.Student);
 
             if (userResult.IsFailure)
@@ -84,8 +90,10 @@ namespace Application.Auth.Commands.Register
             }
 
             var user = userResult.Value;
+
             await _userRepository.AddAsync(user);
             await _unitOfWork.CompleteAsync(ct);
+
 
             await _auditService.LogAsync(new AuditEntry(
                 ActorId: user.Id,
@@ -95,20 +103,6 @@ namespace Application.Auth.Commands.Register
                 IpAddress: ipAddress,
                 Succeeded: true), ct);
 
-            var token = await _identity.GenerateEmailConfirmationTokenAsync(identityId, ct);
-            byte[] tokenBytes = Encoding.UTF8.GetBytes(token);
-            string safeToken = WebEncoders.Base64UrlEncode(tokenBytes);
-            var confirmationLink = $"{_apiSettings.BaseUrl}/api/Authentication/confirm-email?userId={user.Id}&token={safeToken}";
-            var emailResult2 = await _emailService.SendConfirmationEmailAsync(
-                 user.Email.Value,
-                 user.FullName.DisplayName,
-                 confirmationLink,
-                 ct);
-
-            if (emailResult2.IsFailure)
-            {
-                return Result<Guid>.Failure(emailResult2.Error);
-            }
             return Result<Guid>.Success(user.Id);
         }
     }
