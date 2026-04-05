@@ -75,7 +75,7 @@ namespace Application.Features.Users.Commands.Authentication.Login
             {
                 var confirmToken = await _identityService.GenerateEmailConfirmationTokenAsync(user.IdentityId); byte[] confirmTokenBytes = Encoding.UTF8.GetBytes(confirmToken);
                 string safeconfirmToken = WebEncoders.Base64UrlEncode(confirmTokenBytes);
-                var confirmationLink = $"{_apiSettings.BaseUrl}/api/authentication/confirm-email?" +
+                var confirmationLink = $"{_apiSettings.FrontendUrl}/confirm-email?"+
                     $"userId={user.Id}&" +
                     $"token={safeconfirmToken}";
                 var confirmResult = await _emailService.SendActivationReminderEmailAsync

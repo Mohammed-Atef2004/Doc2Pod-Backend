@@ -38,7 +38,7 @@ public sealed class SecurityController : ControllerBase
             request.TotpCode,
             request.NewSecret), ct);
         if (result.IsSuccess)
-            return Ok("Two-Factor Authentication has been enabled successfully!");
+            return Ok(result);
         return BadRequest(result.Error);
     }
 

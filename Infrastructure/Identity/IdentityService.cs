@@ -36,9 +36,6 @@ public sealed class IdentityService : IIdentityService
 
         if (!result.Succeeded)
             return Result<string>.Failure(MapIdentityErrors(result.Errors));
-
-        var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
         return Result<string>.Success(user.Id);
     }
 
@@ -187,7 +184,8 @@ public sealed class IdentityService : IIdentityService
     // =====================
     private static Error MapIdentityErrors(IEnumerable<IdentityError> errors)
     {
-        var combined = string.Join(" | ", errors.Select(e => e.Description));
-        return new Error("Identity.Error", string.IsNullOrWhiteSpace(combined) ? "An identity error occurred." : combined);
+        //var combined = string.Join(" | ", errors.Select(e => e.Description));
+        var firstErrorDescription = errors.FirstOrDefault()?.Description;
+        return new Error("Identity.Error", string.IsNullOrWhiteSpace(firstErrorDescription) ? "An identity error occurred." : firstErrorDescription);
     }
 }

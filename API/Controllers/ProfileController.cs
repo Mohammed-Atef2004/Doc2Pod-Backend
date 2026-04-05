@@ -55,7 +55,7 @@ public class ProfileController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsSuccess)
-            return Ok("A confirmation link has been sent to your new email.");
+            return Ok(result);
 
         return BadRequest(result);
     }
@@ -73,7 +73,7 @@ public class ProfileController : ControllerBase
 
         var result = await _mediator.Send(command, cancellationToken);
 
-        return Ok(result);
+        return BadRequest(result.Error);
     }
 
     [HttpPut("set-phone-number")]

@@ -98,7 +98,9 @@ namespace Application.Auth.Commands.Register
             var token = await _identity.GenerateEmailConfirmationTokenAsync(identityId, ct);
             byte[] tokenBytes = Encoding.UTF8.GetBytes(token);
             string safeToken = WebEncoders.Base64UrlEncode(tokenBytes);
-            var confirmationLink = $"{_apiSettings.BaseUrl}/api/Authentication/confirm-email?userId={user.Id}&token={safeToken}";
+            var confirmationLink = $"{_apiSettings.FrontendUrl}/confirm-email?" +
+                       $"userId={user.Id}&" +
+                       $"token={safeToken}";
             var emailResult2 = await _emailService.SendConfirmationEmailAsync(
                  user.Email.Value,
                  user.FullName.DisplayName,

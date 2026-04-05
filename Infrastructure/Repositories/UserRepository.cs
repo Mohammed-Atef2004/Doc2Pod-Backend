@@ -14,19 +14,19 @@ namespace Infrastructure.Repositories
             _context = context;
         }
         public Task<bool> ExistsByEmailAsync(Email email, CancellationToken ct = default)
-            => _context.Users
+            => _context.Users.AsNoTracking()
                 .AnyAsync(u => u.Email == email, ct);
 
         public Task<bool> ExistsByUsernameAsync(Username username, CancellationToken ct = default)
-            => _context.Users
+            => _context.Users.AsNoTracking()
                 .AnyAsync(u => u.Username == username, ct);
 
         public Task<User?> GetByEmailAsync(Email email, CancellationToken ct = default)
-            => _context.Users
+            => _context.Users.AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == email, ct);
 
         public Task<User?> GetByUsernameAsync(Username username, CancellationToken ct = default)
-            => _context.Users
+            => _context.Users.AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Username == username, ct);
     }
 }

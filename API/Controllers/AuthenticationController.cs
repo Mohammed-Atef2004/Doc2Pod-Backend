@@ -59,19 +59,19 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [HttpPost("verify-2fa-login")]
-        [AllowAnonymous] 
-        public async Task<IActionResult> VerifyTwoFactorLogin(string totPCode, CancellationToken ct)
-        {
 
-            var result = await _mediator.Send(new VerifyTwoFactorLoginCommand(CurrentUserId,totPCode), ct);
+        [HttpPost("verify-2fa-login")]
+        [AllowAnonymous]
+        public async Task<IActionResult> VerifyTwoFactorLogin([FromBody] Verify2FALoginRequest request, CancellationToken ct)
+        {
+            var result = await _mediator.Send(new VerifyTwoFactorLoginCommand(request.UserId, request.TotpCode), ct);
+
             if (result.IsSuccess)
             {
                 return Ok(result);
             }
             return BadRequest(result);
         }
-
 
         [HttpPost("logout")]
         [Authorize]
@@ -93,7 +93,7 @@ namespace API.Controllers
             var result = await _mediator.Send(command, ct);
             if (result.IsSuccess)
             {
-                return Ok("Email confirmed successfully! You can now login.");
+                return Ok(result);
             }
             return BadRequest(result);
         }
@@ -109,7 +109,7 @@ namespace API.Controllers
 
             if (result.IsSuccess)
             {
-                return Ok("Your email has been updated successfully.");
+                return Ok(result);
             }
             else
             {
@@ -126,7 +126,7 @@ namespace API.Controllers
 
             if (result.IsSuccess)
             {
-                return Ok("If your email exists, a reset link has been sent.");
+                return Ok(result);
             }
             else
             {
@@ -144,10 +144,10 @@ namespace API.Controllers
             var updatedCommand = command with { Token = originalToken };
             var result = await _mediator.Send(updatedCommand, ct);
             if (result.IsSuccess)
-                return Ok("Password Reset Success");
+                return Ok(result);
             return BadRequest(result);
         }
 
-
+        public record Verify2FALoginRequest(Guid UserId, string TotpCode);
     }
 }

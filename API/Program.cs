@@ -161,12 +161,11 @@ namespace API
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-                app.UseDeveloperExceptionPage();
+                //app.UseDeveloperExceptionPage();
             }
 
             app.UseHttpsRedirection();
-            app.UseCors("AllowAngular"); // انزل بالسطر ده هنا
-            app.UseHttpsRedirection();
+            app.UseCors("AllowAngular");
             app.UseAuthentication();
             app.UseAuthorization();
 
