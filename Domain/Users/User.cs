@@ -152,7 +152,6 @@ public sealed class User : AggregateRoot<Guid>
         return Result.Success();
     }
 
-    // جوه class User
     public Result UpdatePassword(string newPasswordHash)
     {
         var availabilityResult = CheckAvailability();

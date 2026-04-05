@@ -14,7 +14,9 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Application.Features.Users.Commands.Authentication.Login
@@ -30,7 +32,6 @@ namespace Application.Features.Users.Commands.Authentication.Login
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmailService _emailService;
         private readonly ApiSettings _apiSettings;
-
 
         public LoginCommandHandler(
           IUserRepository userRepository,
@@ -52,7 +53,6 @@ namespace Application.Features.Users.Commands.Authentication.Login
             _emailService = emailService;
             _apiSettings = apiOptions.Value;
             _httpContextAccessor = httpContextAccessor;
-
         }
 
         public async Task<Result<LoginResponse>> Handle(LoginCommand command, CancellationToken ct)
@@ -71,17 +71,21 @@ namespace Application.Features.Users.Commands.Authentication.Login
             if (availabilityResult.IsFailure)
                 return Result<LoginResponse>.Failure(availabilityResult.Error);
 
-            if (!user.IsEmailConfirmed) 
+           
+            if (!user.IsEmailConfirmed)
             {
-                var confirmToken = await _identityService.GenerateEmailConfirmationTokenAsync(user.IdentityId); byte[] confirmTokenBytes = Encoding.UTF8.GetBytes(confirmToken);
+                var confirmToken = await _identityService.GenerateEmailConfirmationTokenAsync(user.IdentityId);
+                byte[] confirmTokenBytes = Encoding.UTF8.GetBytes(confirmToken);
                 string safeconfirmToken = WebEncoders.Base64UrlEncode(confirmTokenBytes);
                 var confirmationLink = $"{_apiSettings.FrontendUrl}/confirm-email?"+
                     $"userId={user.Id}&" +
                     $"token={safeconfirmToken}";
-                var confirmResult = await _emailService.SendActivationReminderEmailAsync
-                    (user.Email.Value,
+
+                await _emailService.SendActivationReminderEmailAsync(
+                    user.Email.Value,
                     user.FullName.DisplayName,
                     confirmationLink);
+
                 return Result<LoginResponse>.Failure(UserErrors.EmailNotConfirmed);
             }
 
@@ -92,6 +96,7 @@ namespace Application.Features.Users.Commands.Authentication.Login
                 user.RecordFailedLogin(ipAddress);
                 _userRepository.Update(user);
                 await _unitOfWork.CompleteAsync(ct);
+
                 await _auditService.LogAsync(new AuditEntry(
                   ActorId: user.Id,
                   Action: AuditActions.UserLoginFailed,
@@ -108,14 +113,30 @@ namespace Application.Features.Users.Commands.Authentication.Login
             _userRepository.Update(user);
             await _unitOfWork.CompleteAsync(ct);
 
+           
             if (user.IsTwoFactorEnabled)
             {
                 return Result<LoginResponse>.Success(new LoginResponse(
                   Token: null,
+                  RefreshToken: null,
                   UserId: user.Id,
                   RequiresTwoFactor: true
                 ));
             }
+
+            
+            var claims = new TokenClaims(
+                UserId: user.IdentityId,  
+                DomainUserId: user.Id,  
+                Email: user.Email.Value,
+                Username: user.Username.Value,
+                Role: user.Role.ToString());
+
+            var accessToken = _tokenService.GenerateAccessToken(claims);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+
+            await _identityService.UpdateRefreshTokenAsync(user.IdentityId, refreshToken, ct);
+
             await _auditService.LogAsync(new AuditEntry(
               ActorId: user.Id,
               Action: AuditActions.UserLogin,
@@ -124,14 +145,9 @@ namespace Application.Features.Users.Commands.Authentication.Login
               IpAddress: ipAddress,
               Succeeded: true), ct);
 
-            var claims = new TokenClaims(
-              UserId: user.Id,
-              Email: user.Email.Value,
-              Username: user.Username.Value,
-              Role: user.Role.ToString());
-
             return Result<LoginResponse>.Success(new LoginResponse(
-              Token: _tokenService.GenerateAccessToken(claims),
+              Token: accessToken,
+              RefreshToken: refreshToken,
               UserId: user.Id,
               RequiresTwoFactor: false));
         }

@@ -13,6 +13,9 @@ namespace Infrastructure.Repositories
         {
             _context = context;
         }
+
+        // قارن الأوبجكت مباشرة (u.Email == email) 
+        // الـ EF هيستخدم الـ ValueConverter اللي إنت عامله أوتوماتيكياً
         public Task<bool> ExistsByEmailAsync(Email email, CancellationToken ct = default)
             => _context.Users.AsNoTracking()
                 .AnyAsync(u => u.Email == email, ct);

@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace Application.Features.Users.Commands.Authentication.VerifyTwoFactor
 {
-    public record LoginResponse(
-        string? Token,
-        Guid UserId,
-        bool RequiresTwoFactor
-    );
+    public sealed record LoginResponse(
+    string? Token,
+    string? RefreshToken, 
+    Guid UserId,
+    bool RequiresTwoFactor
+);
 }
 

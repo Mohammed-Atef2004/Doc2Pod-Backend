@@ -71,7 +71,8 @@ namespace Application.Features.Users.Commands.Authentication.VerifyTwoFactorLogi
             await _unitOfWork.CompleteAsync(ct);
 
             var claims = new TokenClaims(
-                UserId: user.Id,
+                DomainUserId: user.Id,
+                UserId: user.IdentityId,
                 Email: user.Email.Value,
                 Username: user.Username.Value,
                 Role: user.Role.ToString());

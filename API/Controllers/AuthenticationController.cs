@@ -23,9 +23,13 @@ namespace API.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly IMediator _mediator;
+
+        // بنقرأ من "domain_user_id" اللي حطيناه في التوكن بدل sub
+        // لأن sub فيه IdentityId (string) مش الـ Domain Guid
         private Guid CurrentUserId =>
-           Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
-           ?? throw new UnauthorizedAccessException("User ID not found in claims"));
+            Guid.Parse(User.FindFirstValue("domain_user_id")
+            ?? throw new UnauthorizedAccessException("User ID not found in claims"));
+
         public AuthenticationController(IMediator mediator)
         {
             _mediator = mediator;
@@ -35,17 +39,15 @@ namespace API.Controllers
         // Authentication
         // ─────────────────────────────────────────────
 
-
         [HttpPost("register")]
         [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterUserCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
-            if(result.IsSuccess)
+            if (result.IsSuccess)
                 return Ok(result);
             return BadRequest(result.Error);
         }
-
 
         [HttpPost("login")]
         [AllowAnonymous]
@@ -53,9 +55,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(command, cancellationToken);
             if (result.IsFailure)
-            {
                 return BadRequest(result.Error);
-            }
             return Ok(result);
         }
 
@@ -67,21 +67,19 @@ namespace API.Controllers
             var result = await _mediator.Send(new VerifyTwoFactorLoginCommand(request.UserId, request.TotpCode), ct);
 
             if (result.IsSuccess)
-            {
                 return Ok(result);
-            }
+
             return BadRequest(result);
         }
 
         [HttpPost("logout")]
         [Authorize]
-        public async Task<IActionResult> Logout([FromBody] LogoutCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> Logout()
         {
-            var result = await _mediator.Send(command, cancellationToken);
-            return Ok(result);
+            var result = await _mediator.Send(new LogoutCommand());
+            return result.IsSuccess ? Ok() : BadRequest(result.Error);
         }
 
-        //API Design Issue 
         [HttpGet("confirm-email")]
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail([FromQuery] Guid userId, [FromQuery] string token, CancellationToken ct)
@@ -100,7 +98,11 @@ namespace API.Controllers
 
         [HttpGet("confirm-email-change")]
         [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmailChange([FromQuery] Guid userId, [FromQuery] string newEmail, [FromQuery] string token, CancellationToken ct)
+        public async Task<IActionResult> ConfirmEmailChange(
+            [FromQuery] Guid userId,
+            [FromQuery] string newEmail,
+            [FromQuery] string token,
+            CancellationToken ct)
         {
             byte[] decodedBytes = WebEncoders.Base64UrlDecode(token);
             string originalToken = Encoding.UTF8.GetString(decodedBytes);
@@ -116,7 +118,6 @@ namespace API.Controllers
                 return BadRequest(result.Error);
             }
         }
-
 
         [HttpPost("forgot-password")]
         [AllowAnonymous]
@@ -134,7 +135,6 @@ namespace API.Controllers
             }
         }
 
-
         [HttpPost("reset-password")]
         [AllowAnonymous]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command, CancellationToken ct)
@@ -147,6 +147,7 @@ namespace API.Controllers
                 return Ok(result);
             return BadRequest(result);
         }
+    }
 
         public record Verify2FALoginRequest(Guid UserId, string TotpCode);
     }

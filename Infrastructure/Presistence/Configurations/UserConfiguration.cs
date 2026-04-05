@@ -63,5 +63,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         });
 
         builder.Navigation(u => u.FullName).IsRequired();
+        builder.Property(u => u.IdentityId)
+                .HasColumnName("IdentityId")
+                .IsRequired();
+
+        builder.HasIndex(u => u.IdentityId)
+            .IsUnique();
     }
 }
