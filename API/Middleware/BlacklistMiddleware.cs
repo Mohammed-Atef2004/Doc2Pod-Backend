@@ -1,5 +1,4 @@
 ﻿using Domain.Interfaces.Repositories;
-using Domain.Interfaces.Services;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace WebApi.Middlewares;
@@ -26,7 +25,7 @@ public sealed class BlacklistMiddleware
             if (handler.CanReadToken(token))
             {
                 var jwtToken = handler.ReadJwtToken(token);
-                var jti = jwtToken.Id; 
+                var jti = jwtToken.Id;
 
                 if (!string.IsNullOrEmpty(jti) && blacklist.IsRevoked(jti))
                 {

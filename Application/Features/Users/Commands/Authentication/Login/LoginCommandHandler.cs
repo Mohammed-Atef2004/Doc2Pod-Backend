@@ -9,9 +9,7 @@ using Domain.Users.Errors;
 using Domain.Users.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
-using System.Text;
 
 namespace Application.Features.Users.Commands.Authentication.Login
 {
@@ -66,23 +64,23 @@ namespace Application.Features.Users.Commands.Authentication.Login
                 return Result<LoginResponse>.Failure(availabilityResult.Error);
 
 
-            if (!user.IsEmailConfirmed)
-            {
-                var confirmToken = await _identityService.GenerateEmailConfirmationTokenAsync(user.IdentityId);
-                byte[] confirmTokenBytes = Encoding.UTF8.GetBytes(confirmToken);
-                string safeconfirmToken = WebEncoders.Base64UrlEncode(confirmTokenBytes);
+            //if (!user.IsEmailConfirmed)
+            //{
+            //    var confirmToken = await _identityService.GenerateEmailConfirmationTokenAsync(user.IdentityId);
+            //    byte[] confirmTokenBytes = Encoding.UTF8.GetBytes(confirmToken);
+            //    string safeconfirmToken = WebEncoders.Base64UrlEncode(confirmTokenBytes);
 
-                var confirmationLink = $"{_apiSettings.BaseUrl}/api/authentication/confirm-email?" +
-                    $"userId={user.Id}&" +
-                    $"token={safeconfirmToken}";
+            //    var confirmationLink = $"{_apiSettings.BaseUrl}/api/authentication/confirm-email?" +
+            //        $"userId={user.Id}&" +
+            //        $"token={safeconfirmToken}";
 
-                await _emailService.SendActivationReminderEmailAsync(
-                    user.Email.Value,
-                    user.FullName.DisplayName,
-                    confirmationLink);
+            //    await _emailService.SendActivationReminderEmailAsync(
+            //        user.Email.Value,
+            //        user.FullName.DisplayName,
+            //        confirmationLink);
 
-                return Result<LoginResponse>.Failure(UserErrors.EmailNotConfirmed);
-            }
+            //    return Result<LoginResponse>.Failure(UserErrors.EmailNotConfirmed);
+            //}
 
             var passwordValid = await _identityService.CheckPasswordAsync(command.Email, command.Password, ct);
 

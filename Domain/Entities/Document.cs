@@ -7,7 +7,7 @@ namespace Domain.Entities
     {
         public string FileName { get; private set; }
         public string FilePath { get; private set; }
-
+        public DateTime UploadedAt { get; set; }
 
         private readonly List<Podcast> _podcasts = new List<Podcast>();
         public IReadOnlyCollection<Podcast> Podcasts => _podcasts.AsReadOnly();
@@ -18,6 +18,7 @@ namespace Domain.Entities
         {
             FileName = fileName;
             FilePath = filePath;
+            UploadedAt = DateTime.UtcNow;
         }
 
         public Podcast AddPodcast(Guid UserId, PodcastMode mode, string? topic, int? startPage, int? endPage, string scriptPath, string audioPath)
