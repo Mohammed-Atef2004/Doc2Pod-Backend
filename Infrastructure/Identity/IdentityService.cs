@@ -53,7 +53,11 @@ public sealed class IdentityService : IIdentityService
         };
 
         var result = await _userManager.CreateAsync(user, password);
-        return result.Succeeded ? Result<string>.Success(user.Id) : Result<string>.Failure(MapIdentityErrors(result.Errors));
+       
+
+        if (!result.Succeeded)
+            return Result<string>.Failure(MapIdentityErrors(result.Errors));
+        return Result<string>.Success(user.Id);
     }
 
     public async Task<Result> DeleteUserAsync(string identityId, CancellationToken ct = default)
@@ -216,7 +220,8 @@ public sealed class IdentityService : IIdentityService
     // =====================
     private static Error MapIdentityErrors(IEnumerable<IdentityError> errors)
     {
-        var combined = string.Join(" | ", errors.Select(e => e.Description));
-        return new Error("Identity.Error", string.IsNullOrWhiteSpace(combined) ? "An identity error occurred." : combined);
+        //var combined = string.Join(" | ", errors.Select(e => e.Description));
+        var firstErrorDescription = errors.FirstOrDefault()?.Description;
+        return new Error("Identity.Error", string.IsNullOrWhiteSpace(firstErrorDescription) ? "An identity error occurred." : firstErrorDescription);
     }
 }

@@ -164,13 +164,11 @@ namespace API
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-                app.UseDeveloperExceptionPage();
+                //app.UseDeveloperExceptionPage();
             }
 
             app.UseHttpsRedirection();
-
             app.UseCors("AllowAngular");
-
             app.UseAuthentication();
 
             // لازم يكون بعد UseAuthentication عشان الـ User Claims تكون متعبية

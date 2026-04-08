@@ -10,5 +10,6 @@ namespace Domain.Settings
     {
         public const string SectionName = "ApiSettings";
         public string BaseUrl { get; init; } = default!;
+        public string FrontendUrl { get; set; } = string.Empty;
     }
 }

@@ -5,12 +5,9 @@ using Application.Features.Users.Commands.Authentication.Login;
 using Application.Features.Users.Commands.Authentication.Logout;
 using Application.Features.Users.Commands.Authentication.Register;
 using Application.Features.Users.Commands.Authentication.ResetPassword;
-using Application.Features.Users.Commands.Authentication.VerifyTwoFactor;
 using Application.Features.Users.Commands.Authentication.VerifyTwoFactorLogin;
-using Domain.Users.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Security.Claims;
@@ -59,16 +56,12 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        // الـ endpoint ده AllowAnonymous لأن المستخدم لسه مش logged in
-        // فبنبعت الـ UserId في الـ Body مش من التوكن
+
         [HttpPost("verify-2fa-login")]
         [AllowAnonymous]
-        public async Task<IActionResult> VerifyTwoFactorLogin(
-            [FromBody] VerifyTwoFactorLoginRequest request,
-            CancellationToken ct)
+        public async Task<IActionResult> VerifyTwoFactorLogin([FromBody] Verify2FALoginRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(
-                new VerifyTwoFactorLoginCommand(request.UserId, request.TotpCode), ct);
+            var result = await _mediator.Send(new VerifyTwoFactorLoginCommand(request.UserId, request.TotpCode), ct);
 
             if (result.IsSuccess)
                 return Ok(result);
@@ -94,8 +87,9 @@ namespace API.Controllers
             var command = new ConfirmEmailCommand(userId, originalToken);
             var result = await _mediator.Send(command, ct);
             if (result.IsSuccess)
-                return Ok("Email confirmed successfully! You can now login.");
-
+            {
+                return Ok(result);
+            }
             return BadRequest(result);
         }
 
@@ -113,9 +107,13 @@ namespace API.Controllers
             var result = await _mediator.Send(new ConfirmEmailChangeCommand(userId, newEmail, originalToken), ct);
 
             if (result.IsSuccess)
-                return Ok("Your email has been updated successfully.");
-
-            return BadRequest(result.Error);
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result.Error);
+            }
         }
 
         [HttpPost("forgot-password")]
@@ -125,9 +123,13 @@ namespace API.Controllers
             var result = await _mediator.Send(command, ct);
 
             if (result.IsSuccess)
-                return Ok("If your email exists, a reset link has been sent.");
-
-            return BadRequest(result.Error);
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result.Error);
+            }
         }
 
         [HttpPost("reset-password")]
@@ -139,12 +141,11 @@ namespace API.Controllers
             var updatedCommand = command with { Token = originalToken };
             var result = await _mediator.Send(updatedCommand, ct);
             if (result.IsSuccess)
-                return Ok("Password Reset Success");
+                return Ok(result);
             return BadRequest(result);
         }
     }
 
-    public sealed record VerifyTwoFactorLoginRequest(
-        Guid UserId,
-        string TotpCode);
+    public record Verify2FALoginRequest(Guid UserId, string TotpCode);
 }
+

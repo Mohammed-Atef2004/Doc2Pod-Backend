@@ -122,17 +122,17 @@ namespace Application.Features.Users.Commands.Profile.ChangeEmail
             byte[] tokenBytes = Encoding.UTF8.GetBytes(token);
             string safeToken = WebEncoders.Base64UrlEncode(tokenBytes);
             string safeEmail = WebUtility.UrlEncode(command.NewEmail);
-            var confirmationLink = $"{_apiSettings.BaseUrl}/api/authentication/confirm-email-change?" +
-                                   $"userId={user.Id}&" +
-                                   $"newEmail={safeEmail}&" +
-                                   $"token={safeToken}";
+            var confirmationLink = $"{_apiSettings.FrontendUrl}/email-update-confirm?" +
+                       $"userId={user.Id}&" +
+                       $"newEmail={safeEmail}&" +
+                       $"token={safeToken}";
             var warningResult =await _emailService.SendEmailChangeWarningAsync
               (user.Email.Value,
               user.FullName.DisplayName,
               ct);
             if (warningResult.IsFailure)
             {
-                return Result<Guid>.Failure(warningResult.Error);
+                return Result.Failure(warningResult.Error);
             }
             var changeMailResult =await _emailService.SendEmailChangeConfirmationAsync
               (command.NewEmail
@@ -140,7 +140,7 @@ namespace Application.Features.Users.Commands.Profile.ChangeEmail
               confirmationLink, ct);
             if (changeMailResult.IsFailure)
             {
-                return Result<Guid>.Failure(changeMailResult.Error);
+                return Result.Failure(changeMailResult.Error);
             }
             return Result.Success();
         }

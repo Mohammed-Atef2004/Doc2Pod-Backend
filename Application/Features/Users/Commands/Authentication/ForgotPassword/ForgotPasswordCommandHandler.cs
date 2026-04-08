@@ -67,7 +67,7 @@ namespace Application.Features.Users.Commands.Authentication.ForgotPassword
                 var confirmToken = await _identityService.GenerateEmailConfirmationTokenAsync(user.IdentityId);
                 byte[] confirmTokenBytes = Encoding.UTF8.GetBytes(confirmToken);
                 string safeconfirmToken = WebEncoders.Base64UrlEncode(confirmTokenBytes);
-                var confirmationLink = $"{_apiSettings.BaseUrl}/api/authentication/confirm-email?" +
+                var confirmationLink = $"{_apiSettings.FrontendUrl}/confirm-email?" +
                     $"userId={user.Id}&" +
                     $"token={safeconfirmToken}";
                 var confirmResult =await _emailService.SendActivationReminderEmailAsync
@@ -122,10 +122,9 @@ namespace Application.Features.Users.Commands.Authentication.ForgotPassword
 
             byte[] tokenBytes = Encoding.UTF8.GetBytes(token);
             string safeToken = WebEncoders.Base64UrlEncode(tokenBytes);
-            var resetLink = $"{_apiSettings.BaseUrl}/api/authentication/reset-password?" +
+            var resetLink = $"{_apiSettings.FrontendUrl}/reset-password?" + 
                 $"userId={user.Id}&" +
                 $"token={safeToken}";
-
             var emailTask = await _emailService.SendPasswordResetEmailAsync(
                 user.Email.Value,
                 user.FullName.DisplayName,

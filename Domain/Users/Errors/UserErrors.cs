@@ -39,7 +39,7 @@ public static class UserErrors
         new("User.CannotAssignSuperAdminRole", "SuperAdmin role cannot be assigned through normal operations.");
 
     public static readonly Error InvalidCredentials =
-        new("User.InvalidCredentials", "Invalid email or password.");
+        new("User.InvalidCredentials", "Authentication failed. Please check your credentials.");
 
     public static readonly Error EmailNotConfirmed =
         new("User.EmailNotConfirmed", "Please confirm your email address before logging in.");
