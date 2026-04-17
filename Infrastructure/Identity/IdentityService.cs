@@ -49,7 +49,7 @@ public sealed class IdentityService : IIdentityService
         {
             UserName = username,
             Email = email,
-            DomainUserId = domainUserId // نربطه بالـ ID من أول ثانية
+            DomainUserId = domainUserId 
         };
 
         var result = await _userManager.CreateAsync(user, password);

@@ -46,7 +46,7 @@ namespace Application.Features.Podcasts.Commands.GeneratePodcast
             var taskId = await _ragService.StartGenerationAsync(request);
             PodcastGenerationStatusResponse status = null;
 
-            int maxRetries = 800;
+            int maxRetries = 2000;
 
             while (maxRetries > 0)
             {
