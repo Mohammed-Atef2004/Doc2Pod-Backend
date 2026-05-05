@@ -154,6 +154,7 @@ namespace API
             builder.Services.AddAuthorization();
 
             var app = builder.Build();
+            app.UseCors("AllowAngular");
 
             // ==========================
             // 6. Middleware Pipeline
@@ -168,7 +169,6 @@ namespace API
             }
 
             app.UseHttpsRedirection();
-            app.UseCors("AllowAngular");
             app.UseAuthentication();
 
             app.UseMiddleware<BlacklistMiddleware>();

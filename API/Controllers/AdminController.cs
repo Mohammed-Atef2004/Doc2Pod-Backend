@@ -21,7 +21,8 @@ public sealed class AdminController : ControllerBase
     public AdminController(ISender sender) => _sender = sender;
 
     private Guid CurrentUserId =>
-        Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+     Guid.Parse(User.FindFirstValue("domain_user_id")
+     ?? throw new UnauthorizedAccessException("User ID not found in claims"));
 
     // ─── PUT api/admin/users/{userId}/role ────────────────────────────────────
 

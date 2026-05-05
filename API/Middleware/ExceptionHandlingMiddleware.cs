@@ -23,7 +23,7 @@ public class ExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
-            //_logger.LogError(ex, "An unhandled exception has occurred: {Message}", ex.Message);
+            _logger.LogError(ex, "An unhandled exception has occurred: {Message}", ex.Message);
             await HandleExceptionAsync(context, ex);
         }
     }
@@ -34,10 +34,10 @@ public class ExceptionHandlingMiddleware
 
         var statusCode = HttpStatusCode.InternalServerError;
         var title = "Server Error";
-        var detail = "An unexpected error occurred on our side.";
+        var detail = exception.Message; 
         var type = "Server.Error";
 
-        IDictionary<string, string[]> validationErrors = null;
+        IDictionary<string, string[]> validationErrors = new Dictionary<string, string[]>();
 
         switch (exception)
         {
@@ -45,8 +45,7 @@ public class ExceptionHandlingMiddleware
                 statusCode = HttpStatusCode.BadRequest;
                 title = "Validation Error";
                 detail = "One or more validation failures occurred.";
-                type = "Server.Error";
-
+                type = "ValidationError";
                 validationErrors = validationException.Errors
                     .GroupBy(e => e.PropertyName)
                     .ToDictionary(
@@ -58,18 +57,29 @@ public class ExceptionHandlingMiddleware
             case KeyNotFoundException:
                 statusCode = HttpStatusCode.NotFound;
                 title = "Resource Not Found";
+                type = "NotFoundError";
+                break;
+
+            case UnauthorizedAccessException:
+                statusCode = HttpStatusCode.Unauthorized;
+                title = "Unauthorized Access";
+                type = "AuthError";
                 break;
         }
 
         context.Response.StatusCode = (int)statusCode;
 
-        var problemDetails = new ValidationProblemDetails(validationErrors ?? new Dictionary<string, string[]>())
+        var problemDetails = new ValidationProblemDetails(validationErrors)
         {
             Status = (int)statusCode,
             Type = type,
             Title = title,
-            Detail = detail
+            Detail = detail,
+            Instance = context.Request.Path
         };
-        await context.Response.WriteAsJsonAsync(problemDetails);
+
+        var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        var json = JsonSerializer.Serialize(problemDetails, options);
+        await context.Response.WriteAsync(json);
     }
 }
