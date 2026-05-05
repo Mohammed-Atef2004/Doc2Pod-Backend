@@ -16,5 +16,6 @@ namespace Application.Features.Users.Queries.GetUserById
      string Role,
      bool IsActive,
      bool IsEmailConfirmed,
-     DateTime? LastLogin);
+     bool IsTwoFactorEnabled,
+    DateTime? LastLogin);
 }

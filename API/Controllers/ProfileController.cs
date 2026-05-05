@@ -73,7 +73,10 @@ public class ProfileController : ControllerBase
             request.TwoFactorCode);
 
         var result = await _mediator.Send(command, cancellationToken);
-
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
         return BadRequest(result.Error);
     }
 
@@ -89,6 +92,7 @@ public class ProfileController : ControllerBase
             request.TwoFactorCode);
 
         var result = await _mediator.Send(command, cancellationToken);
+
         return Ok(result);
     }
 

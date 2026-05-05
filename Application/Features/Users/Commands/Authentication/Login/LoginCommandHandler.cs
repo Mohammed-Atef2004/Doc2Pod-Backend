@@ -65,7 +65,7 @@ namespace Application.Features.Users.Commands.Authentication.Login
 
             var user = await _userRepository.GetByEmailAsync(emailResult.Value, ct);
             if (user is null)
-                return Result<LoginResponse>.Failure(UserErrors.NotFound);
+                return Result<LoginResponse>.Failure(UserErrors.InvalidCredentials);
 
             var availabilityResult = user.CheckAvailability();
             if (availabilityResult.IsFailure)
