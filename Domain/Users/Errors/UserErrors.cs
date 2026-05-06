@@ -1,7 +1,6 @@
-using  Domain.SharedKernel;
-using  Domain.Users.ValueObjects;
+using Domain.SharedKernel;
 
-namespace  Domain.Users.Errors;
+namespace Domain.Users.Errors;
 
 public static class UserErrors
 {
@@ -47,7 +46,11 @@ public static class UserErrors
     public static readonly Error AccountDeleted =
         new("User.AccountDeleted", "This account has been deleted and cannot be accessed.");
 
-
+    public static readonly Error InvalidUserId =
+    new(
+        "User.InvalidUserId",
+        "The current user's ID is missing or invalid."
+    );
 
 
 
@@ -69,7 +72,7 @@ public static class UserErrors
         public static readonly Error PasswordAlreadyUsed =
             new("User.Security.PasswordAlreadyUsed",
                 "This password was used recently. Please choose a different password.");
-        public static readonly Error InvalidEmailToken=
+        public static readonly Error InvalidEmailToken =
             new("User.Security.InvalidEmailToken", "The provided email token is invalid or expired.");
         public static readonly Error InvalidTotpCode =
             new("User.Security.InvalidTotpCode", "The provided TotpCode is Invalid");

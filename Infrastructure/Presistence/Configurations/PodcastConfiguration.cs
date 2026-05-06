@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Domain.Enums;
+using Domain.Podcasts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,19 +11,20 @@ namespace Infrastructure.Persistence.Configurations
         {
             builder.HasKey(p => p.Id);
 
-            builder.Property(p => p.ScriptPath)
-                .IsRequired();
-
-            builder.Property(p => p.AudioPath)
-                .IsRequired();
-
-            builder.Property(p => p.Mode)
-                .IsRequired();
+            builder.Property(p => p.Status)
+                .HasConversion<string>()
+                .IsRequired()
+                .HasDefaultValue(PodcastStatus.Pending);
 
             builder.HasOne(p => p.Document)
                 .WithMany(d => d.Podcasts)
                 .HasForeignKey(p => p.DocumentId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(p => p.User)
+                .WithMany(u => u.Podcasts)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

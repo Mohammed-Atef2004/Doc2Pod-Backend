@@ -1,11 +1,13 @@
-﻿using  Domain.SharedKernel;
-using  Domain.Users.Errors;
-using  Domain.Users.Events;
-using  Domain.Users.Rules;
-using  Domain.Users.ValueObjects;
-using static  Domain.Users.Errors.UserErrors;
+﻿using Domain.Documents;
+using Domain.Podcasts;
+using Domain.SharedKernel;
+using Domain.Users.Errors;
+using Domain.Users.Events;
+using Domain.Users.Rules;
+using Domain.Users.ValueObjects;
+using static Domain.Users.Errors.UserErrors;
 
-namespace  Domain.Users;
+namespace Domain.Users;
 
 
 public sealed class User : AggregateRoot<Guid>
@@ -59,6 +61,9 @@ public sealed class User : AggregateRoot<Guid>
 
     /// <summary>UTC timestamp of the most recent password change.</summary>
     public DateTime? PasswordChangedAt { get; private set; }
+
+    public ICollection<Podcast> Podcasts { get; private set; }
+    public ICollection<Document> Documents { get; private set; }
 
     // ─── Constructor / Factory ─────────────────────────────────────────────────
 
@@ -180,7 +185,7 @@ public sealed class User : AggregateRoot<Guid>
     public Result UpdateEmail(Email newEmail, bool isEmailTaken)
     {
         var checkResult = CanUpdateEmail(isEmailTaken);
-        if(checkResult.IsFailure)
+        if (checkResult.IsFailure)
             return checkResult;
         var oldEmail = Email.Value;
         Email = newEmail;
@@ -223,7 +228,7 @@ public sealed class User : AggregateRoot<Guid>
         var availabilityResult = CheckAvailability();
         if (availabilityResult.IsFailure)
             return availabilityResult;
-        
+
         if (Role == newRole) return Result.Failure(UserErrors.RoleAlreadyAssigned);
 
         // SuperAdmin is only seeded, never assigned through normal flow

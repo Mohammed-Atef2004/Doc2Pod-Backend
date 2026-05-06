@@ -1,17 +1,18 @@
-﻿using Application;
+﻿using API.Hubs;
+using API.Hubs.RealTime;
+using Application;
 using Application.Interfaces;
 using Domain.Interfaces.Services;
 using EducationalPlatform.Infrastructure.Services.Token;
+using Hangfire;
 using Infrastructure.Identity;
 using Infrastructure.Persistence;
 using Infrastructure.Presistence.Data;
-using Infrastructure.Services;
 using Infrastructure.Services.PythonService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -63,7 +64,7 @@ namespace API
                         Array.Empty<string>()
                     }
                 });
-                });
+            });
 
 
 
@@ -141,19 +142,53 @@ namespace API
                 options.AddPolicy("AllowAngular",
                     policy =>
                     {
-                        policy.WithOrigins("http://localhost:4200") 
+                        policy.WithOrigins("http://localhost:4200")
                               .AllowAnyHeader()
                               .AllowAnyMethod()
-                              .AllowCredentials(); 
+                              .AllowCredentials();
                     });
             });
 
             builder.Services.AddAuthorization();
 
-            var app = builder.Build();
 
+            //// ==========================
+            //// 5. Hangfire
+            //// ==========================
+            ///
+            builder.Services.AddHangfire(configuration => configuration
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddHangfireServer(options =>
+            {
+                options.WorkerCount = 1;
+            });
+
+
+            //// ==========================
+            //// 6. SignalR
+            //// ==========================
+            ///
+            builder.Services.AddSignalR();
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(IPodcastNotificationService).Assembly));
+            builder.Services.AddScoped<IPodcastNotificationService, PodcastNotificationService>();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("SignalRPolicy", policy =>
+                {
+                    policy.AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .WithOrigins("http://localhost:4200") // رابط مشروع الأنجولار
+                          .AllowCredentials(); // دي أهم واحدة عشان SignalR يشتغل
+                });
+            });
+            var app = builder.Build();
+            app.UseCors("SignalRPolicy");
             // ==========================
-            // 5. Middleware Pipeline
+            // 7. Middleware Pipeline
             // ==========================
             app.UseMiddleware<ExceptionHandlingMiddleware>();
 
@@ -164,10 +199,14 @@ namespace API
                 //app.UseDeveloperExceptionPage();
             }
 
+            app.MapHub<PodcastHub>("/podcastHub");
+
             app.UseHttpsRedirection();
             app.UseCors("AllowAngular");
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseHangfireDashboard();
 
             app.MapControllers();
 
