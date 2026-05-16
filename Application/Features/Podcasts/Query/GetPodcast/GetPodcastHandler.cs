@@ -1,12 +1,15 @@
 ﻿using Application.Interfaces;
+using Domain.Enums;
 using Domain.Interfaces.Repositories;
+using Domain.Podcasts.Errors;
+using Domain.SharedKernel;
 using MediatR;
 
 namespace Application.Features.Podcasts.Query.GetPodcast
 {
     public class GetPodcastHandler
     {
-        public class GetAudioStreamQueryHandler : IRequestHandler<GetPodcastQuery, Stream>
+        public class GetAudioStreamQueryHandler : IRequestHandler<GetPodcastQuery, Result<Stream>>
         {
             private readonly IUnitOfWork _unitOfWork;
             private readonly IFileStorageService _storageService;
@@ -22,20 +25,21 @@ namespace Application.Features.Podcasts.Query.GetPodcast
                 _httpClient = httpClient;
             }
 
-            public async Task<Stream> Handle(GetPodcastQuery request, CancellationToken cancellationToken)
+            public async Task<Result<Stream>> Handle(GetPodcastQuery request, CancellationToken cancellationToken)
             {
-                var audio = await _unitOfWork.Podcast
-                    .GetByIdAsync(request.Id);
+                var podcast = await _unitOfWork.Podcast.GetByIdAsync(request.Id);
 
-                if (audio == null)
-                    throw new Exception("Audio not found");
+                if (podcast == null)
+                    return Result<Stream>.Failure(GetPodcastErrors.NotFound);
 
-                if (string.IsNullOrEmpty(audio.AudioPath))
-                    throw new Exception("File path is missing");
+                if (podcast.Status != PodcastStatus.Completed)
+                    return Result<Stream>.Failure(GetPodcastErrors.NotReady);
 
+                if (string.IsNullOrEmpty(podcast.AudioPath))
+                    return Result<Stream>.Failure(GetPodcastErrors.MissingAudioPath);
 
                 var signedUrl = await _storageService
-                      .GetSignedUrlAsync("Podcasts", audio.AudioPath);
+                      .GetSignedUrlAsync("Podcasts", podcast.AudioPath);
 
                 var response = await _httpClient.GetAsync(
                     signedUrl,
@@ -43,9 +47,11 @@ namespace Application.Features.Podcasts.Query.GetPodcast
                     cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
-                    throw new Exception("Failed to fetch audio");
+                    return Result<Stream>.Failure(GetPodcastErrors.StorageAccessFailed);
 
-                return await response.Content.ReadAsStreamAsync(cancellationToken);
+                var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+
+                return Result<Stream>.Success(stream);
             }
         }
     }

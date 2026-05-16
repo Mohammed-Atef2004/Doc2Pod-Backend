@@ -1,25 +1,37 @@
-﻿using MediatR;
+﻿using Domain.SharedKernel;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Domain.SharedKernel; 
 namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 public abstract class ApiController : ControllerBase
 {
-    protected readonly ISender _sender;
-
-    protected ApiController(ISender sender)
-    {
-        _sender = sender;
-    }
+    private ISender? _sender;
+    protected ISender Sender => _sender ??= HttpContext.RequestServices.GetRequiredService<ISender>();
 
     protected IActionResult HandleFailure(Result result)
     {
+        if (result.IsSuccess)
+        {
+            throw new InvalidOperationException("Success results should not call HandleFailure.");
+        }
+
+        int statusCode = result.Error.Code switch
+        {
+            var code when code.Contains("Unauthorized") || code.Contains("Invalid")
+                => StatusCodes.Status401Unauthorized,
+            var code when code.EndsWith(".NotFound")
+                => StatusCodes.Status404NotFound,
+            var code when code.EndsWith(".AlreadyExists") || code.EndsWith("AlreadyExists")
+                => StatusCodes.Status409Conflict,
+            "Podcast.NotReady" => StatusCodes.Status400BadRequest,
+
+            _ => StatusCodes.Status400BadRequest
+        };
+
         return result switch
         {
-            { IsSuccess: true } => throw new InvalidOperationException(),
-
             IValidationResult validationResult =>
                 BadRequest(
                     CreateProblemDetails(
@@ -28,13 +40,23 @@ public abstract class ApiController : ControllerBase
                         result.Error,
                         validationResult.Errors)),
 
-            _ => BadRequest(
-                CreateProblemDetails(
-                    "Bad Request",
-                    StatusCodes.Status400BadRequest,
-                    result.Error))
+
+            _ => StatusCode(statusCode,
+                    CreateProblemDetails(
+                        GetTitleForStatus(statusCode),
+                        statusCode,
+                        result.Error))
         };
     }
+
+    private static string GetTitleForStatus(int statusCode) =>
+        statusCode switch
+        {
+            StatusCodes.Status401Unauthorized => "Unauthorized Access",
+            StatusCodes.Status404NotFound => "Resource Not Found",
+            StatusCodes.Status409Conflict => "Conflict / Duplicate",
+            _ => "Bad Request"
+        };
 
     private static ProblemDetails CreateProblemDetails(
         string title,
