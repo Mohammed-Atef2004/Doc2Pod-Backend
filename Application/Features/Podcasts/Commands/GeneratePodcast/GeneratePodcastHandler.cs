@@ -1,116 +1,78 @@
-﻿using Application.Common.Exceptions;
-using Application.Features.Podcasts.DTOs.Requests;
-using Application.Features.Podcasts.DTOs.Responses;
-using Application.Interfaces;
-using Domain.Entities;
+﻿using Application.Interfaces;
+using Domain.Enums;
 using Domain.Interfaces.Repositories;
+using Domain.Podcasts.Errors;
+using Domain.SharedKernel;
+using Domain.Users.Errors;
+using Hangfire;
 using MediatR;
-using Microsoft.Extensions.DependencyInjection; 
-using System.Net.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Features.Podcasts.Commands.GeneratePodcast
 {
-    public class GeneratePodcastHandler : IRequestHandler<GeneratePodcastCommand, Guid>
+    public class GeneratePodcastHandler : IRequestHandler<GeneratePodcastCommand, Result<Guid>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPythonRagService _ragService;
-        private readonly IServiceScopeFactory _scopeFactory; 
+        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IUserContext _userContext;
 
         public GeneratePodcastHandler(
             IPythonRagService ragService,
             IUnitOfWork unitOfWork,
-            IServiceScopeFactory scopeFactory) 
+            IServiceScopeFactory scopeFactory,
+            IUserContext userContext)
         {
             _ragService = ragService;
             _unitOfWork = unitOfWork;
             _scopeFactory = scopeFactory;
+            _userContext = userContext;
         }
 
-        public async Task<Guid> Handle(GeneratePodcastCommand command, CancellationToken cancellationToken)
+        public async Task<Result<Guid>> Handle(GeneratePodcastCommand command, CancellationToken cancellationToken)
         {
-            
+            var userid = _userContext.UserId;
+            if (userid == null)
+            {
+                return Result<Guid>.Failure(UserErrors.InvalidUserId);
+
+            }
+
             var initialDocument = await _unitOfWork.Document.GetByIdAsync(command.DocumentId);
 
             if (initialDocument == null)
-                throw new NotFoundException(nameof(Document), command.DocumentId);
+                return Result<Guid>.Failure(GeneratePodcastErrors.DocumentNotFound);
 
-            var request = new GeneratePodcastRequest
+            if (command.Mode == PodcastMode.Full)
             {
-                FileKey = initialDocument.FilePath,
-                Mode = (int)command.Mode,
-                Topic = command.Topic,
-                StartPage = command.StartPage,
-                EndPage = command.EndPage
-            };
+                var alreadyExists = await _unitOfWork.Podcast.ExistsAsync(p =>
+                    p.DocumentId == command.DocumentId &&
+                    (int)p.Mode == 3);
 
-            
-            var taskId = await _ragService.StartGenerationAsync(request);
-            PodcastGenerationStatusResponse status = null;
-
-            int maxRetries = 800;
-
-            while (maxRetries > 0)
-            {
-                maxRetries--;
-                await Task.Delay(TimeSpan.FromSeconds(15), cancellationToken);
-
-                try
+                if (alreadyExists)
                 {
-                    status = await _ragService.GetStatusAsync(taskId);
-
-                    if (status.Status == "DONE")
-                    {
-                        break;
-                    }
-                    else if (status.Status == "ERROR")
-                    {
-                        throw new Exception($"AI Error: {status.Error}");
-                    }
-                }
-                catch (HttpRequestException)
-                {
-                    Console.WriteLine("Network blip from Cloudflare ignored. Retrying...");
-                    continue;
-                }
-                catch (TaskCanceledException)
-                {
-                    Console.WriteLine("Request timeout ignored. Retrying...");
-                    continue;
+                    return Result<Guid>.Failure(GeneratePodcastErrors.FullPodcastAlreadyExists);
                 }
             }
 
-            if (status == null || status.Status != "DONE")
-                throw new Exception("Podcast generation timeout");
+            var podcast = initialDocument.AddPodcast
+            (
+                userid.Value,
+                command.Mode,
+                command.Topic,
+                command.StartPage,
+                command.EndPage,
+                PodcastStatus.Pending
+            );
 
-            if (string.IsNullOrEmpty(status.AudioPath))
-                throw new Exception("Audio path is NULL");
+            await _unitOfWork.Podcast.AddAsync(podcast);
+            await _unitOfWork.CompleteAsync(cancellationToken);
 
-            if (string.IsNullOrEmpty(status.ScriptPath))
-                throw new Exception("Script path is NULL");
+            BackgroundJob.Enqueue<IPodcastService>(s =>
+                s.ProcessPodcastGenerationAsync(podcast.Id, initialDocument.FilePath, command));
 
-            
-            using (var scope = _scopeFactory.CreateScope())
-            {
-                var freshUnitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                var freshDocument = await freshUnitOfWork.Document.GetByIdAsync(command.DocumentId);
+            return Result<Guid>.Success(podcast.Id);
 
-                if (freshDocument == null)
-                    throw new NotFoundException(nameof(Document), command.DocumentId);
-
-                var podcast = freshDocument.AddPodcast(
-                    command.Mode,
-                    command.Topic,
-                    command.StartPage,
-                    command.EndPage,
-                    status.ScriptPath,
-                    status.AudioPath
-                );
-
-                await freshUnitOfWork.Podcast.AddAsync(podcast);
-                await freshUnitOfWork.CompleteAsync(cancellationToken);
-
-                return podcast.Id;
-            }
         }
     }
 }

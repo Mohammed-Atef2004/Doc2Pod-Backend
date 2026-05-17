@@ -1,40 +1,45 @@
 ﻿using Domain.Enums;
+using Domain.Podcasts;
 using Domain.SharedKernel;
+using Domain.Users;
 
-namespace Domain.Entities
+namespace Domain.Documents
 {
     public class Document : Entity<Guid>, ISoftDeletable
     {
         public string FileName { get; private set; }
+        public Guid UserId { get; private set; }
         public string FilePath { get; private set; }
         public DateTime UploadedAt { get; private set; }
+        public string FileHash { get; private set; }
 
         private readonly List<Podcast> _podcasts = new List<Podcast>();
         public IReadOnlyCollection<Podcast> Podcasts => _podcasts.AsReadOnly();
 
+        public User User { get; private set; }
+
         protected Document() { }
 
-        public Document(string fileName, string filePath)
+        public Document(Guid userId, string fileName, string filePath, string fileHash)
         {
+            UserId = userId;
             FileName = fileName;
             FilePath = filePath;
+            FileHash = fileHash;
             UploadedAt = DateTime.UtcNow;
         }
 
-        public Podcast AddPodcast(PodcastMode mode, string? topic, int? startPage, int? endPage, string scriptPath, string audioPath)
+        public Podcast AddPodcast(Guid userId, PodcastMode mode, string? topic, int? startPage, int? endPage, PodcastStatus podcastStatus)
         {
 
-            if (_podcasts.Any(p => p.Mode == mode))
-                throw new Exception("Podcast already exists for this mode");
-
             var podcast = new Podcast(
+                userId,
                 Id,
                 mode,
                 topic,
                 startPage,
                 endPage,
-                scriptPath,
-                audioPath
+                podcastStatus
             );
 
             _podcasts.Add(podcast);

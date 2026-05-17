@@ -11,7 +11,6 @@ using Infrastructure.Presistence.Interceptors;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.Shared;
 using Infrastructure.Services;
-using Infrastructure.Services.PythonService;
 using Infrastructure.Services.PythonService.Mapping;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +42,8 @@ public static class DependencyInjection
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
+        services.AddHttpContextAccessor();
+        services.AddScoped<IUserContext, UserContext>();
 
         // 4. Register UnitOfWork
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -68,17 +69,11 @@ public static class DependencyInjection
         services.AddTransient<IEmailService, EmailService>();
         services.AddDataProtection();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddSingleton<IPodcastService, PodcastService>();
+        services.AddScoped<IFileHashService, FileHashService>();
 
-        // 8. Register Python RAG Service & AI Integration
-        services.AddHttpClient<IPythonRagService, PythonRagService>(client =>
-        {
-            var baseUrl = configuration["PythonAI:BaseUrl"] ?? "http://localhost:5000";
-            client.BaseAddress = new Uri(baseUrl);
-            client.Timeout = System.Threading.Timeout.InfiniteTimeSpan;
-            client.DefaultRequestHeaders.Add("ngrok-skip-browser-warning", "true");
-        });
 
-        // 9. Register Mapper (AutoMapper)
+        // 8. Register Mapper (AutoMapper)
         services.AddAutoMapper(typeof(PythonMappingProfile));
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 

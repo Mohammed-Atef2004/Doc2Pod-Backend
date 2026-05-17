@@ -1,5 +1,7 @@
 ﻿using Domain.Interfaces.Repositories;
+using Domain.SharedKernel;
 using Infrastructure.Presistence.Data;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories.Shared
@@ -7,21 +9,46 @@ namespace Infrastructure.Repositories.Shared
     public sealed class UnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext _context;
-
+        private readonly IMediator _mediator;
         public IDocumentRepository Document { get; private set; }
         public IPodcastRepository Podcast { get; private set; }
 
-        public UnitOfWork(AppDbContext context)
+        public UnitOfWork(AppDbContext context, IMediator mediator)
         {
             _context = context;
+            _mediator = mediator;
             Document = new DocumentRepository(_context);
             Podcast = new PodcastRepository(_context);
+
         }
 
 
         public async Task<int> CompleteAsync(CancellationToken cancellationToken = default)
         {
-            return await _context.SaveChangesAsync(cancellationToken);
+
+            var aggregateRoots = _context.ChangeTracker
+                .Entries<IAggregateRoot>()
+                .Select(e => e.Entity)
+                .Where(e => e.DomainEvents.Any())
+                .ToList();
+
+            var domainEvents = aggregateRoots
+                .SelectMany(e => e.DomainEvents)
+                .ToList();
+
+            foreach (var entity in aggregateRoots)
+            {
+                entity.ClearDomainEvents();
+            }
+
+            var result = await _context.SaveChangesAsync(cancellationToken);
+
+            foreach (var domainEvent in domainEvents)
+            {
+                await _mediator.Publish(domainEvent, cancellationToken);
+            }
+
+            return result;
         }
 
 
@@ -49,7 +76,7 @@ namespace Infrastructure.Repositories.Shared
                         break;
                 }
             }
-            await Task.CompletedTask; 
+            await Task.CompletedTask;
             return 0;
         }
     }
