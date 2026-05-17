@@ -16,6 +16,7 @@ using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using WebApi.Middlewares;
+using Serilog;
 
 namespace API
 {
@@ -23,10 +24,17 @@ namespace API
     {
         public static void Main(string[] args)
         {
-            // مسح الـ Mapping الافتراضي للـ Claims عشان نستخدم الـ Standard JWT Names
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
+            Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.File(
+                "logs/log-.txt",
+                rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
             var builder = WebApplication.CreateBuilder(args);
+            builder.Host.UseSerilog();
             builder.Configuration.AddUserSecrets<Program>();
 
             // ==========================
@@ -34,6 +42,17 @@ namespace API
             // ==========================
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
+            Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .WriteTo.Console(
+                    outputTemplate:
+                    "[MY-APP] [{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext} - {Message:lj}{NewLine}{Exception}")
+                .WriteTo.File(
+                    "logs/log-.txt",
+                    rollingInterval: RollingInterval.Day,
+                    outputTemplate:
+                    "[MY-APP] [{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext} - {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
 
             builder.Services.AddSwaggerGen(options =>
             {
@@ -108,9 +127,7 @@ namespace API
             // ==========================
             // 4. Token Blacklist (MemoryCache)
             // ==========================
-            // AddMemoryCache بيضيف الـ IMemoryCache في الـ DI
             builder.Services.AddMemoryCache();
-            // Singleton لأن الـ Cache محتاج يكون shared بين كل الـ requests
             builder.Services.AddSingleton<ITokenBlacklistService, TokenBlacklistService>();
 
             // ==========================

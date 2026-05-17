@@ -1,4 +1,5 @@
 ﻿using Application;
+using Application.Behaviors;
 using Application.Common.Behaviors;
 using FluentValidation;
 using MediatR;
@@ -13,6 +14,17 @@ public static class DependencyInjection
         cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         });
         services.AddValidatorsFromAssembly(typeof(ApplicationAssemblyMarker).Assembly);
+        services.AddTransient(
+            typeof(IPipelineBehavior<,>),
+            typeof(ExceptionHandlingBehavior<,>));
+
+        services.AddTransient(
+            typeof(IPipelineBehavior<,>),
+            typeof(PerformanceBehavior<,>));
+
+        services.AddTransient(
+            typeof(IPipelineBehavior<,>),
+            typeof(LoggingBehavior<,>));
         return services;
     }
 }
