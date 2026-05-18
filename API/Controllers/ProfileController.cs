@@ -22,8 +22,6 @@ public class ProfileController : ControllerBase
         _mediator = mediator;
     }
 
-    // بنقرأ من "domain_user_id" اللي حطيناه في التوكن بدل sub
-    // لأن sub فيه IdentityId (string) مش الـ Domain Guid
     private Guid CurrentUserId =>
         Guid.Parse(User.FindFirstValue("domain_user_id")
         ?? throw new UnauthorizedAccessException("User ID not found in claims"));
