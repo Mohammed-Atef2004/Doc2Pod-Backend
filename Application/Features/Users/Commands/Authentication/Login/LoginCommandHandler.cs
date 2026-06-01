@@ -11,11 +11,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Features.Users.Commands.Authentication.Login
 {
@@ -71,11 +67,11 @@ namespace Application.Features.Users.Commands.Authentication.Login
             if (availabilityResult.IsFailure)
                 return Result<LoginResponse>.Failure(availabilityResult.Error);
 
-            if (!user.IsEmailConfirmed) 
+            if (!user.IsEmailConfirmed)
             {
                 var confirmToken = await _identityService.GenerateEmailConfirmationTokenAsync(user.IdentityId); byte[] confirmTokenBytes = Encoding.UTF8.GetBytes(confirmToken);
                 string safeconfirmToken = WebEncoders.Base64UrlEncode(confirmTokenBytes);
-                var confirmationLink = $"{_apiSettings.FrontendUrl}/confirm-email?"+
+                var confirmationLink = $"{_apiSettings.FrontendUrl}/confirm-email?" +
                     $"userId={user.Id}&" +
                     $"token={safeconfirmToken}";
                 var confirmResult = await _emailService.SendActivationReminderEmailAsync

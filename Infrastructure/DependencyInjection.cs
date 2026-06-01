@@ -67,6 +67,7 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddTransient<IEmailService, EmailService>();
+        services.AddTransient<IPdfValidationService, PdfValidationService>();
         services.AddDataProtection();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IPodcastService, PodcastService>();

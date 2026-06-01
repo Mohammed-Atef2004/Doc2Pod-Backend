@@ -14,7 +14,12 @@ namespace API.Hubs.RealTime
 
         public async Task NotifyStatusChanged(Guid userId, Guid podcastId, string newStatus)
         {
-            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveStatusUpdate", podcastId, newStatus);
+
+            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveStatusUpdate", new
+            {
+                podcastId = podcastId.ToString(),
+                status = newStatus
+            });
         }
     }
 }

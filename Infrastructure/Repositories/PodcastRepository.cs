@@ -48,7 +48,9 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Document)
                 .Where(x =>
                     x.UserId == userId &&
-                   (x.Status == PodcastStatus.Processing | x.Status == PodcastStatus.Pending))
+                   (x.Status == PodcastStatus.Processing ||
+                    x.Status == PodcastStatus.Pending))
+                .OrderByDescending(x => x.CreatedAt)
                 .FirstOrDefaultAsync();
         }
     }

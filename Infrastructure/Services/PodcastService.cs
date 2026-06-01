@@ -59,7 +59,13 @@ namespace Infrastructure.Services
                         }
                         else if (status.Status == "ERROR")
                         {
-                            await UpdateStatus(podcastId, PodcastStatus.Failed, status.Error);
+                            string userMessage = "Podcast generation failed.";
+
+                            await UpdateStatus(
+                                podcastId,
+                                PodcastStatus.Failed,
+                                userMessage
+                            );
                             return;
                         }
                     }
@@ -100,6 +106,7 @@ namespace Infrastructure.Services
             if (podcast != null)
             {
                 podcast.SetPaths(script, audio);
+                podcast.UpdateStatus(PodcastStatus.Completed);
                 await uow.CompleteAsync();
             }
         }

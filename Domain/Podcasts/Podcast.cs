@@ -61,8 +61,6 @@ namespace Domain.Podcasts
 
             ScriptPath = scriptPath;
             AudioPath = audioPath;
-
-            Status = PodcastStatus.Completed;
         }
 
         public void UpdateStatus(PodcastStatus status, string? error = null)

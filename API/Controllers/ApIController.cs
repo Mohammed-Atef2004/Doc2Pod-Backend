@@ -19,11 +19,13 @@ public abstract class ApiController : ControllerBase
 
         int statusCode = result.Error.Code switch
         {
+            var code when code.Contains("Page")
+               => StatusCodes.Status400BadRequest,
             var code when code.Contains("Unauthorized") || code.Contains("Invalid")
                 => StatusCodes.Status401Unauthorized,
             var code when code.EndsWith(".NotFound")
                 => StatusCodes.Status404NotFound,
-            var code when code.EndsWith(".AlreadyExists") || code.EndsWith("AlreadyExists")
+            var code when code.EndsWith(".AlreadyExists") || code.EndsWith("AlreadyExists") || code.EndsWith(".AlreadyRunning")
                 => StatusCodes.Status409Conflict,
             "Podcast.NotReady" => StatusCodes.Status400BadRequest,
 

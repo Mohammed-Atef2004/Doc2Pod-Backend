@@ -11,10 +11,9 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
-using System.Net;
 using System.Text;
 
-namespace Application.Auth.Commands.Register 
+namespace Application.Auth.Commands.Register
 {
     public sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<Guid>>
     {
@@ -59,7 +58,7 @@ namespace Application.Auth.Commands.Register
             var isEmailTaken = await _userRepository.ExistsByEmailAsync(emailResult.Value, ct);
             var isUsernameTaken = await _userRepository.ExistsByUsernameAsync(usernameResult.Value, ct);
 
-            var identityResult = await _identity.CreateUserAsync(command.Email,command.Username, command.Password, ct);
+            var identityResult = await _identity.CreateUserAsync(command.Email, command.Username, command.Password, ct);
             if (identityResult.IsFailure)
             {
                 return Result<Guid>.Failure(identityResult.Error);
@@ -74,7 +73,7 @@ namespace Application.Auth.Commands.Register
                 command.FirstName,
                 command.LastName,
                 isEmailTaken,
-                isUsernameTaken, 
+                isUsernameTaken,
                 UserRole.Student);
 
             if (userResult.IsFailure)

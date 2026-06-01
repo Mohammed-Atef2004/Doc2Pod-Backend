@@ -47,11 +47,14 @@ namespace Application.Features.Documents.Commands.UploadDocument
 
             var filePath = await _fileStorageService.SaveFileAsync(request.File);
 
+            var pageCount = await _fileHashService.GetPageCountAsync(request.File);
+
             var document = new Document(
                 userid.Value,
                 request.File.FileName,
                 filePath,
-                fileHash
+                fileHash,
+                pageCount
             );
 
             await _unitOfWork.Document.AddAsync(document);

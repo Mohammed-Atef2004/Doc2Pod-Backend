@@ -39,15 +39,19 @@ namespace Application.Features.Podcasts.Query.GetPodcastStatus
 
             if (podcast is null)
             {
-                return Result<PodcastStatusResponse>.Success(new PodcastStatusResponse(
-                    null,
-                    "None"
-                ));
+                return Result<PodcastStatusResponse>.Success(
+                    new PodcastStatusResponse(
+                        null,
+                        "None"
+                    )
+                );
             }
 
-            return Result<PodcastStatusResponse>.Success(new PodcastStatusResponse(
-                podcast.Id,
-                podcast.Status.ToString())
+            return Result<PodcastStatusResponse>.Success(
+                new PodcastStatusResponse(
+                    podcast.Id,
+                    podcast.Status.ToString()
+                )
             );
         }
     }

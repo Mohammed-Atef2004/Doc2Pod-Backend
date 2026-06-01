@@ -14,6 +14,7 @@ namespace Application.Features.Podcasts.Commands.GeneratePodcast
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPythonRagService _ragService;
+        private readonly IPdfValidationService _pdfValidationService;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IUserContext _userContext;
 
@@ -21,11 +22,13 @@ namespace Application.Features.Podcasts.Commands.GeneratePodcast
             IPythonRagService ragService,
             IUnitOfWork unitOfWork,
             IServiceScopeFactory scopeFactory,
+            IPdfValidationService pdfValidationService,
             IUserContext userContext)
         {
             _ragService = ragService;
             _unitOfWork = unitOfWork;
             _scopeFactory = scopeFactory;
+            _pdfValidationService = pdfValidationService;
             _userContext = userContext;
         }
 
@@ -54,7 +57,26 @@ namespace Application.Features.Podcasts.Commands.GeneratePodcast
                     return Result<Guid>.Failure(GeneratePodcastErrors.FullPodcastAlreadyExists);
                 }
             }
+            if (command.Mode == PodcastMode.PageRange)
+            {
+                var validationResult =
+                 _pdfValidationService.ValidatePageRange(
+                        command.StartPage,
+                        command.EndPage);
 
+                if (validationResult.IsFailure)
+                {
+                    return Result<Guid>.Failure(
+                        validationResult.Error);
+                }
+                if (command.EndPage > initialDocument.PageCount)
+                    return Result<Guid>.Failure(GeneratePodcastErrors.InvalidEndPageExceedsTotal(initialDocument.PageCount));
+            }
+            var runningPodcast = await _unitOfWork.Podcast.GetRunningPodcastByUserIdAsync(userid.Value);
+            if (runningPodcast != null)
+            {
+                return Result<Guid>.Failure(GeneratePodcastErrors.PodcastAlreadyRunning);
+            }
             var podcast = initialDocument.AddPodcast
             (
                 userid.Value,
