@@ -9,49 +9,48 @@ namespace Application.Features.Podcasts.Query.GetPodcast
 {
     public class GetPodcastHandler
     {
-        public class GetAudioStreamQueryHandler : IRequestHandler<GetPodcastQuery, Result<Stream>>
+        public class GetAudioStreamQueryHandler : IRequestHandler<GetPodcastQuery, Result<string>>
         {
             private readonly IUnitOfWork _unitOfWork;
             private readonly IFileStorageService _storageService;
             private readonly HttpClient _httpClient;
-
+            private readonly IUserContext _userContext;
             public GetAudioStreamQueryHandler(
                 IUnitOfWork unitOfWork,
                 IFileStorageService storageService,
-                HttpClient httpClient)
+                HttpClient httpClient,
+                IUserContext userContext)
             {
                 _unitOfWork = unitOfWork;
                 _storageService = storageService;
                 _httpClient = httpClient;
+                _userContext = userContext;
             }
 
-            public async Task<Result<Stream>> Handle(GetPodcastQuery request, CancellationToken cancellationToken)
+            public async Task<Result<string>> Handle(GetPodcastQuery request, CancellationToken cancellationToken)
             {
+                var userid = _userContext.UserId;
                 var podcast = await _unitOfWork.Podcast.GetByIdAsync(request.Id);
 
+
                 if (podcast == null)
-                    return Result<Stream>.Failure(GetPodcastErrors.NotFound);
+                    return Result<string>.Failure(GetPodcastErrors.NotFound);
+
+                if (podcast.UserId != userid)
+                    return Result<string>.Failure(GetPodcastErrors.Unauthorized);
 
                 if (podcast.Status != PodcastStatus.Completed)
-                    return Result<Stream>.Failure(GetPodcastErrors.NotReady);
+                    return Result<string>.Failure(GetPodcastErrors.NotReady);
 
                 if (string.IsNullOrEmpty(podcast.AudioPath))
-                    return Result<Stream>.Failure(GetPodcastErrors.MissingAudioPath);
-
+                    return Result<string>.Failure(GetPodcastErrors.MissingAudioPath);
                 var signedUrl = await _storageService
-                      .GetSignedUrlAsync("Podcasts", podcast.AudioPath);
+                    .GetSignedUrlAsync("Podcasts", podcast.AudioPath);
 
-                var response = await _httpClient.GetAsync(
-                    signedUrl,
-                    HttpCompletionOption.ResponseHeadersRead,
-                    cancellationToken);
+                if (string.IsNullOrEmpty(signedUrl))
+                    return Result<string>.Failure(GetPodcastErrors.StorageAccessFailed);
 
-                if (!response.IsSuccessStatusCode)
-                    return Result<Stream>.Failure(GetPodcastErrors.StorageAccessFailed);
-
-                var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-
-                return Result<Stream>.Success(stream);
+                return Result<string>.Success(signedUrl);
             }
         }
     }

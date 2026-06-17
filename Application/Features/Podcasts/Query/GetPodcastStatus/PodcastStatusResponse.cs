@@ -2,6 +2,5 @@
 {
     public record PodcastStatusResponse(
     Guid? PodcastId,
-    string Status
-);
+    string Status);
 }

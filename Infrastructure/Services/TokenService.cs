@@ -1,5 +1,4 @@
 ﻿using Domain.Interfaces.Services;
-using Domain.Users;
 using Infrastructure.Identity;
 using Infrastructure.Presistence.Data;
 using Microsoft.AspNetCore.Identity;
@@ -45,7 +44,7 @@ public sealed class TokenService : ITokenService
         {
             // sub => IdentityId (string) — بيتستخدم في Logout و Token ops
             new Claim(JwtRegisteredClaimNames.Sub,   claims.UserId),
-            // domain_user_id => DomainUserId (Guid) — بيتستخدم في Controllers
+            new Claim(ClaimTypes.NameIdentifier, claims.DomainUserId.ToString()),
             new Claim("domain_user_id",              claims.DomainUserId.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, claims.Email),
             new Claim(JwtRegisteredClaimNames.Jti,   Guid.NewGuid().ToString()),

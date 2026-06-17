@@ -9,16 +9,18 @@ using Hangfire;
 using Infrastructure.Identity;
 using Infrastructure.Persistence;
 using Infrastructure.Presistence.Data;
+using Infrastructure.Services;
 using Infrastructure.Services.PythonService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using WebApi.Middlewares;
-using Serilog;
 
 namespace API
 {
@@ -80,6 +82,8 @@ namespace API
                         Array.Empty<string>()
                     }
                 });
+
+
             });
 
             builder.Services.AddLogging();
@@ -157,6 +161,21 @@ namespace API
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
                     ClockSkew = TimeSpan.Zero
                 };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/podcastHub"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             builder.Services.AddCors(options =>
@@ -195,6 +214,8 @@ namespace API
             //// ==========================
             ///
             builder.Services.AddSignalR();
+            builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
+
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(IPodcastNotificationService).Assembly));
             builder.Services.AddScoped<IPodcastNotificationService, PodcastNotificationService>();
             builder.Services.AddCors(options =>

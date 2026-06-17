@@ -16,7 +16,9 @@ namespace Domain.Podcasts.Errors
 
         public static readonly Error StorageAccessFailed =
             new("Podcast.StorageAccessFailed", "Could not retrieve the audio file from the storage service.");
-
+        public static readonly Error Unauthorized =
+            new("Podcast.Unauthorized",
+        "You are not authorized to access this podcast.");
     }
 }
 

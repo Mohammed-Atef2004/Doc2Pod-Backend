@@ -1,6 +1,5 @@
 ﻿using Application.Interfaces;
 using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
 
 
 namespace Infrastructure.Services
@@ -15,6 +14,7 @@ namespace Infrastructure.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
+
         public Guid? UserId
         {
             get
@@ -22,7 +22,7 @@ namespace Infrastructure.Services
                 var userId = _httpContextAccessor
                     .HttpContext?
                     .User?
-                    .FindFirst(ClaimTypes.NameIdentifier)
+                    .FindFirst("domain_user_id")
                     ?.Value;
 
                 if (Guid.TryParse(userId, out var parsedId))

@@ -1,92 +1,90 @@
-﻿using Domain.Entities;
+﻿using Domain.Documents;
 using Domain.Enums;
 using FluentAssertions;
-using Xunit;
 
 namespace Domain.Tests.Entities;
 
 public class DocumentTests
 {
-    [Fact]
-    public void Constructor_Should_Set_Properties_Correctly()
+    private static Document CreateDocument(
+        Guid? userId = null,
+        string fileName = "file.pdf",
+        string filePath = "/files/file.pdf",
+        string fileHash = "abc123hash",
+        int pageCount = 10)
     {
-        // Arrange
-        var fileName = "file.pdf";
-        var filePath = "/files/file.pdf";
-
-    // Act
-    var document = new Document(fileName, filePath);
-
-        // Assert
-        document.FileName.Should().Be(fileName);
-        document.FilePath.Should().Be(filePath);
-        document.UploadedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
-        document.Podcasts.Should().BeEmpty();
+        return new Document(
+            userId ?? Guid.NewGuid(),
+            fileName,
+            filePath,
+            fileHash,
+            pageCount);
     }
 
     [Fact]
+    public void Constructor_Should_Set_Properties_Correctly()
+    {
+        var userId = Guid.NewGuid();
+        var fileName = "file.pdf";
+        var filePath = "/files/file.pdf";
+        var fileHash = "abc123hash";
+        var pageCount = 10;
+
+        var document = new Document(userId, fileName, filePath, fileHash, pageCount);
+        document.UserId.Should().Be(userId);
+        document.FileName.Should().Be(fileName);
+        document.FilePath.Should().Be(filePath);
+        document.FileHash.Should().Be(fileHash);
+        document.PageCount.Should().Be(pageCount);
+        document.UploadedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+        document.Podcasts.Should().BeEmpty();
+    }
+    [Fact]
     public void AddPodcast_Should_Add_New_Podcast()
     {
-        // Arrange
-        var document = new Document("file.pdf", "/files/file.pdf");
-
-        // Act
+        var userId = Guid.NewGuid();
+        var document = CreateDocument(userId);
         var podcast = document.AddPodcast(
+            userId,
             PodcastMode.Full,
             topic: null,
             startPage: null,
             endPage: null,
-            scriptPath: "script.txt",
-            audioPath: "audio.mp3"
-        );
-
-        // Assert
+            PodcastStatus.Pending);
         document.Podcasts.Should().HaveCount(1);
         document.Podcasts.Should().Contain(podcast);
     }
 
     [Fact]
-    public void AddPodcast_Should_Throw_When_Same_Mode_Already_Exists()
+    public void AddPodcast_Should_Return_Podcast_With_Correct_Properties()
     {
-        // Arrange
-        var document = new Document("file.pdf", "/files/file.pdf");
+        var userId = Guid.NewGuid();
+        var document = CreateDocument(userId);
 
-        document.AddPodcast(
-            PodcastMode.Full,
-            null,
-            null,
-            null,
-            "script.txt",
-            "audio.mp3"
-        );
+        var podcast = document.AddPodcast(
+            userId,
+            PodcastMode.Query,
+            topic: "AI",
+            startPage: 1,
+            endPage: 5,
+            PodcastStatus.Pending);
 
-        // Act
-        Action act = () => document.AddPodcast(
-            PodcastMode.Full,
-            null,
-            null,
-            null,
-            "script2.txt",
-            "audio2.mp3"
-        );
-
-        // Assert
-        act.Should().Throw<Exception>()
-           .WithMessage("Podcast already exists for this mode");
+        podcast.UserId.Should().Be(userId);
+        podcast.DocumentId.Should().Be(document.Id);
+        podcast.Mode.Should().Be(PodcastMode.Query);
+        podcast.Topic.Should().Be("AI");
+        podcast.StartPage.Should().Be(1);
+        podcast.EndPage.Should().Be(5);
+        podcast.Status.Should().Be(PodcastStatus.Pending);
     }
 
     [Fact]
     public void AddPodcast_Should_Allow_Different_Modes()
     {
-        // Arrange
-        var document = new Document("file.pdf", "/files/file.pdf");
-
-        // Act
-        document.AddPodcast(PodcastMode.Query, null, null, null, "s1", "a1");
-        document.AddPodcast(PodcastMode.Full, null, null, null, "s2", "a2");
-
-        // Assert
+        var userId = Guid.NewGuid();
+        var document = CreateDocument(userId);
+        document.AddPodcast(userId, PodcastMode.Full, null, null, null, PodcastStatus.Pending);
+        document.AddPodcast(userId, PodcastMode.Query, "AI", 1, 5, PodcastStatus.Pending);
         document.Podcasts.Should().HaveCount(2);
     }
-
 }

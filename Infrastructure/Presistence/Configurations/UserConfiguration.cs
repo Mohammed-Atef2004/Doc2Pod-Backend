@@ -2,13 +2,12 @@
 using Domain.Users.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Migrations;
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.ToTable("DomainUsers"); 
+        builder.ToTable("DomainUsers");
 
         builder.HasKey(u => u.Id);
 
@@ -69,5 +68,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasIndex(u => u.IdentityId)
             .IsUnique();
+
+
     }
 }

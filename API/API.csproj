@@ -41,6 +41,7 @@
     <Folder Include="Filters\" />
     <Folder Include="Extensions\" />
     <Folder Include="Contracts\" />
+    <Folder Include="logs\" />
   </ItemGroup>
 
 </Project>

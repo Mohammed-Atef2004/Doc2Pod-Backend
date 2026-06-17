@@ -211,7 +211,7 @@ public sealed class IdentityService : IIdentityService
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
 
             await _userManager.UpdateAsync(user);
-            
+
         }
     }
     // =====================
@@ -222,5 +222,15 @@ public sealed class IdentityService : IIdentityService
         //var combined = string.Join(" | ", errors.Select(e => e.Description));
         var firstErrorDescription = errors.FirstOrDefault()?.Description;
         return new Error("Identity.Error", string.IsNullOrWhiteSpace(firstErrorDescription) ? "An identity error occurred." : firstErrorDescription);
+    }
+
+    public async Task UpdateDomainUserIdAsync(string identityId, Guid domainUserId, CancellationToken ct)
+    {
+        var identityUser = await _userManager.FindByIdAsync(identityId);
+        if (identityUser != null)
+        {
+            identityUser.DomainUserId = domainUserId;
+            await _userManager.UpdateAsync(identityUser);
+        }
     }
 }

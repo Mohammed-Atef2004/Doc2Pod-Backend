@@ -38,7 +38,7 @@ namespace API.Controllers
             {
                 return HandleFailure(result);
             }
-            return File(result.Value, "audio/mpeg", enableRangeProcessing: true);
+            return Ok(new { audioUrl = result.Value });
         }
 
 

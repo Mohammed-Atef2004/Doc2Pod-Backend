@@ -11,8 +11,7 @@ namespace API.Controllers
     [Route("api/documents")]
     public class DocumentController : ApiController
     {
-
-
+        [RequestSizeLimit(50 * 1024 * 1024)]
         [HttpPost("upload")]
         public async Task<IActionResult> Upload([FromForm] UploadDocumentCommand command)
         {
@@ -25,6 +24,7 @@ namespace API.Controllers
 
             return Ok(result.Value);
         }
+
 
         [HttpGet("my-document")]
         public async Task<IActionResult> GetUserDocuments([FromQuery] DocumentQueryParameters parameters)

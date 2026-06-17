@@ -12,6 +12,7 @@ namespace Domain.Documents
         public string FilePath { get; private set; }
         public DateTime UploadedAt { get; private set; }
         public string FileHash { get; private set; }
+        public int PageCount { get; private set; }
 
         private readonly List<Podcast> _podcasts = new List<Podcast>();
         public IReadOnlyCollection<Podcast> Podcasts => _podcasts.AsReadOnly();
@@ -20,13 +21,14 @@ namespace Domain.Documents
 
         protected Document() { }
 
-        public Document(Guid userId, string fileName, string filePath, string fileHash)
+        public Document(Guid userId, string fileName, string filePath, string fileHash, int pageCount)
         {
             UserId = userId;
             FileName = fileName;
             FilePath = filePath;
             FileHash = fileHash;
             UploadedAt = DateTime.UtcNow;
+            PageCount = pageCount;
         }
 
         public Podcast AddPodcast(Guid userId, PodcastMode mode, string? topic, int? startPage, int? endPage, PodcastStatus podcastStatus)
