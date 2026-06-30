@@ -31,12 +31,13 @@ namespace Domain.Documents
             PageCount = pageCount;
         }
 
-        public Podcast AddPodcast(Guid userId, PodcastMode mode, string? topic, int? startPage, int? endPage, PodcastStatus podcastStatus)
+        public Result<Podcast> AddPodcast(Guid userId, string ttsModel, PodcastMode mode, string? topic, int? startPage, int? endPage, PodcastStatus podcastStatus)
         {
 
             var podcast = new Podcast(
                 userId,
                 Id,
+                ttsModel,
                 mode,
                 topic,
                 startPage,
@@ -45,8 +46,8 @@ namespace Domain.Documents
             );
 
             _podcasts.Add(podcast);
+            return Result<Podcast>.Success(podcast);
 
-            return podcast;
         }
     }
 }

@@ -15,10 +15,9 @@ namespace Domain.Podcasts.Errors
            "You already have a podcast being generated. Please wait for it to finish.");
 
         public static readonly Error InvalidStartPage =
-    new(
+       new(
         "Podcast.InvalidStartPage",
-        "Start page must be greater than 0."
-    );
+        "Start page must be greater than 0.");
 
         public static readonly Error InvalidEndPage =
             new(
@@ -37,5 +36,10 @@ namespace Domain.Podcasts.Errors
                 $"End page exceeds the total number of pages in the document ({totalPages} pages)."
             );
 
+        public static readonly Error GenerationFailed = new(
+        "Podcast.GenerationFailed",
+        "We encountered an unexpected error while generating your podcast. Please try again later."
+    );
     }
+
 }

@@ -19,6 +19,8 @@ public abstract class ApiController : ControllerBase
 
         int statusCode = result.Error.Code switch
         {
+            "Podcast.GenerationFailed"
+              => StatusCodes.Status500InternalServerError,
             var code when code.Contains("Page")
                => StatusCodes.Status400BadRequest,
             var code when code.Contains("Unauthorized") || code.Contains("Invalid")

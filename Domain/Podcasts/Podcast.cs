@@ -1,5 +1,6 @@
 ﻿using Domain.Documents;
 using Domain.Enums;
+using Domain.Podcasts.Errors;
 using Domain.Podcasts.Events;
 using Domain.SharedKernel;
 using Domain.Users;
@@ -12,9 +13,8 @@ namespace Domain.Podcasts
         public Guid DocumentId { get; private set; }
         public Guid UserId { get; private set; }
         public PodcastMode Mode { get; private set; }
-
         public string? Topic { get; private set; }
-
+        public string TTSModel { get; private set; }
         public int? StartPage { get; private set; }
 
         public int? EndPage { get; private set; }
@@ -33,6 +33,7 @@ namespace Domain.Podcasts
         public Podcast(
             Guid userId,
             Guid documentId,
+            string ttsModel,
             PodcastMode mode,
             string? topic,
             int? startPage,
@@ -43,6 +44,7 @@ namespace Domain.Podcasts
             Id = Guid.NewGuid();
             UserId = userId;
             DocumentId = documentId;
+            TTSModel = ttsModel;
             Mode = mode;
             Topic = topic;
             StartPage = startPage;
@@ -51,19 +53,20 @@ namespace Domain.Podcasts
 
         }
 
-        public void SetPaths(string scriptPath, string audioPath)
+        public Result SetPaths(string scriptPath, string audioPath)
         {
             if (string.IsNullOrWhiteSpace(scriptPath))
-                throw new ArgumentException("Script path cannot be null or empty", nameof(scriptPath));
+                return Result<Podcast>.Failure(GeneratePodcastErrors.GenerationFailed);
 
             if (string.IsNullOrWhiteSpace(audioPath))
-                throw new ArgumentException("Audio path cannot be null or empty", nameof(audioPath));
+                return Result<Podcast>.Failure(GeneratePodcastErrors.GenerationFailed);
 
             ScriptPath = scriptPath;
             AudioPath = audioPath;
+            return Result.Success();
         }
 
-        public void UpdateStatus(PodcastStatus status, string? error = null)
+        public Result UpdateStatus(PodcastStatus status, string? error = null)
         {
             Status = status;
             if (status == PodcastStatus.Completed)
@@ -75,6 +78,7 @@ namespace Domain.Podcasts
                 ErrorMessage = error;
             }
             AddDomainEvent(new PodcastStatusChangedDomainEvent(UserId, Id, status.ToString()));
+            return Result.Success();
         }
     }
 }

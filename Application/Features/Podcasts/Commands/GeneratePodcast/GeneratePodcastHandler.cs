@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
+using Domain.Podcasts;
 using Domain.Podcasts.Errors;
 using Domain.SharedKernel;
 using Domain.Users.Errors;
@@ -77,15 +78,22 @@ namespace Application.Features.Podcasts.Commands.GeneratePodcast
             {
                 return Result<Guid>.Failure(GeneratePodcastErrors.PodcastAlreadyRunning);
             }
-            var podcast = initialDocument.AddPodcast
-            (
+
+            var result = initialDocument.AddPodcast(
                 userid.Value,
+                command.TTSModel,
                 command.Mode,
                 command.Topic,
                 command.StartPage,
                 command.EndPage,
                 PodcastStatus.Pending
             );
+            if (result.IsFailure)
+            {
+                return Result<Guid>.Failure(result.Error);
+            }
+
+            Podcast podcast = result.Value;
 
             await _unitOfWork.Podcast.AddAsync(podcast);
             await _unitOfWork.CompleteAsync(cancellationToken);

@@ -44,15 +44,18 @@ public class DocumentTests
     {
         var userId = Guid.NewGuid();
         var document = CreateDocument(userId);
-        var podcast = document.AddPodcast(
+        string model = "Vibe Voice";
+        var result = document.AddPodcast(
             userId,
+            model,
             PodcastMode.Full,
             topic: null,
             startPage: null,
             endPage: null,
             PodcastStatus.Pending);
+        result.IsSuccess.Should().BeTrue();
         document.Podcasts.Should().HaveCount(1);
-        document.Podcasts.Should().Contain(podcast);
+        document.Podcasts.Should().Contain(result.Value);
     }
 
     [Fact]
@@ -60,31 +63,36 @@ public class DocumentTests
     {
         var userId = Guid.NewGuid();
         var document = CreateDocument(userId);
-
-        var podcast = document.AddPodcast(
+        string model = "Vibe Voice";
+        var result = document.AddPodcast(
             userId,
+            model,
             PodcastMode.Query,
             topic: "AI",
             startPage: 1,
             endPage: 5,
             PodcastStatus.Pending);
-
-        podcast.UserId.Should().Be(userId);
-        podcast.DocumentId.Should().Be(document.Id);
-        podcast.Mode.Should().Be(PodcastMode.Query);
-        podcast.Topic.Should().Be("AI");
-        podcast.StartPage.Should().Be(1);
-        podcast.EndPage.Should().Be(5);
-        podcast.Status.Should().Be(PodcastStatus.Pending);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.UserId.Should().Be(userId);
+        result.Value.DocumentId.Should().Be(document.Id);
+        result.Value.Mode.Should().Be(PodcastMode.Query);
+        result.Value.Topic.Should().Be("AI");
+        result.Value.StartPage.Should().Be(1);
+        result.Value.EndPage.Should().Be(5);
+        result.Value.Status.Should().Be(PodcastStatus.Pending);
     }
 
     [Fact]
     public void AddPodcast_Should_Allow_Different_Modes()
     {
         var userId = Guid.NewGuid();
+        string model = "Vibe Voice";
         var document = CreateDocument(userId);
-        document.AddPodcast(userId, PodcastMode.Full, null, null, null, PodcastStatus.Pending);
-        document.AddPodcast(userId, PodcastMode.Query, "AI", 1, 5, PodcastStatus.Pending);
+        var result1 = document.AddPodcast(userId, model, PodcastMode.Full, null, null, null, PodcastStatus.Pending);
+        var result2 = document.AddPodcast(userId, model, PodcastMode.Query, "AI", 1, 5, PodcastStatus.Pending);
+
+        result1.IsSuccess.Should().BeTrue();
+        result2.IsSuccess.Should().BeTrue();
         document.Podcasts.Should().HaveCount(2);
     }
 }

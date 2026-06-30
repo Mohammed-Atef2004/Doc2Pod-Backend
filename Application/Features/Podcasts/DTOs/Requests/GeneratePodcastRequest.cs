@@ -7,5 +7,6 @@
         public string? Topic { get; set; }
         public int? StartPage { get; set; }
         public int? EndPage { get; set; }
+        public bool UseGeminiTts { get; set; } = false;
     }
 }

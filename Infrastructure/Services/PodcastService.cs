@@ -24,6 +24,9 @@ namespace Infrastructure.Services
             await UpdateStatus(podcastId, PodcastStatus.Processing);
 
             var cancellationToken = CancellationToken.None;
+            bool useGeminiBool = command.TTSModel == "Gemini Voice";
+            Console.WriteLine($"TTSModel = {command.TTSModel}");
+            Console.WriteLine($"UseGeminiBool = {useGeminiBool}");
 
             try
             {
@@ -33,7 +36,8 @@ namespace Infrastructure.Services
                     Mode = (int)command.Mode,
                     Topic = command.Topic,
                     StartPage = command.StartPage,
-                    EndPage = command.EndPage
+                    EndPage = command.EndPage,
+                    UseGeminiTts = useGeminiBool
                 };
 
                 var taskId = await _ragService.StartGenerationAsync(request);
